@@ -12,6 +12,7 @@
     "build": "npm run lint && rm -rf dist && babel src -d dist && npm run pkg"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "debug": "^3.1.0",
     "lodash": "^4.17.10",
     "sistemium-telegram": "^1.1.1"

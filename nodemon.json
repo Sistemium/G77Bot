@@ -1,0 +1,10 @@
+{
+  "env": {
+    "DEBUG": "stm:*",
+    "PHRASE_NOT_IMPLEMENTED": "I don't understand this kind of messages",
+    "REDIS_DB": 7,
+    "BOT_USER_NAME": "G77Bot",
+    "DEBUG_NAMESPACE": "stm:g77b",
+    "ERROR_NAMESPACE": "stm:g77b:error"
+  }
+}
