@@ -1,0 +1,39 @@
+{
+  "name": "g77bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for G77",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src",
+    "test": "npm run lint",
+    "babel-node": "babel-node",
+    "start": "nodemon --exec 'npm run lint && babel-node' -- src/index.js",
+    "pkg": "cp package.json dist",
+    "build": "npm run lint && rm -rf dist && babel src -d dist && npm run pkg"
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "lodash": "^4.17.10",
+    "sistemium-telegram": "^1.1.1"
+  },
+  "devDependencies": {
+    "telegraf": "^3.22.2",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
+    "nodemon": "^1.18.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sistemium/G77Bot.git"
+  },
+  "author": "Sistemium UAB",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sistemium/G77Bot/issues"
+  },
+  "homepage": "https://github.com/Sistemium/G77Bot#readme"
+}
