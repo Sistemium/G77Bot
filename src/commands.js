@@ -1,5 +1,7 @@
 import start from './middleware/start';
 import calc from './middleware/calc';
+import saleOrders from './middleware/saleOrders';
+
 import * as auth from './middleware/auth';
 
 
@@ -12,6 +14,7 @@ export default function (bot) {
 
   bot.command('start', start);
   bot.command('roles', auth.getRoles);
+  bot.command('orders', saleOrders);
 
   bot.hears(/^\/auth[ ]?(\d*)$/, auth.auth);
   bot.command('confirm', auth.confirm);
