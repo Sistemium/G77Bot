@@ -15,7 +15,9 @@
     "axios": "^0.18.0",
     "debug": "^3.1.0",
     "lodash": "^4.17.10",
-    "sistemium-telegram": "^1.1.1"
+    "sistemium-telegram": "^1.1.1",
+    "sqs-consumer": "^3.4.0",
+    "aws-sdk": "^2.7.6"
   },
   "devDependencies": {
     "telegraf": "^3.22.2",
