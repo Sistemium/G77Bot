@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 const API_URL = 'https://api.sistemium.com/v4d/dr50';
+// const API_URL = 'http://localhost:9090/api/dr50';
 
-// eslint-disable-next-line
 export function findAll(name, authorization, params) {
 
-  return axios.get(apiurl(name), {
+  return axios.get(apiUrl(name), {
     params,
     headers: { authorization },
   })
@@ -13,7 +13,17 @@ export function findAll(name, authorization, params) {
 
 }
 
+export function find(name, authorization, params) {
 
-function apiurl(name) {
+  return axios.get(apiUrl(name), {
+    params,
+    headers: { authorization },
+  })
+    .then(({ data }) => data && data[0]);
+
+}
+
+
+function apiUrl(name) {
   return `${API_URL}/${name}`;
 }
