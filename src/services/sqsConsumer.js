@@ -1,16 +1,16 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
-import AWS from 'aws-sdk';
+import { SQS } from 'aws-sdk';
 
 const { debug, error } = log('sqsConsumer');
-const QUE_URL = 'https://sqs.eu-west-1.amazonaws.com/554658909973/g77Bot-dr50';
+const { QUE_URL } = process.env;
 
 export default function init(bot) {
 
   const sqs = Consumer.create({
     queueUrl: QUE_URL,
     handleMessage,
-    sqs: new AWS.SQS({ region: 'eu-west-1' }),
+    sqs: new SQS({ region: 'eu-west-1' }),
   });
 
   sqs.on('error', error);
@@ -33,6 +33,8 @@ export default function init(bot) {
 
     } catch (e) {
       error(e);
+      done(e);
     }
   }
+
 }

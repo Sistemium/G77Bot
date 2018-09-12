@@ -5,6 +5,7 @@
     "REDIS_DB": 7,
     "BOT_USER_NAME": "G77Bot",
     "DEBUG_NAMESPACE": "stm:g77b",
-    "ERROR_NAMESPACE": "stm:g77b:error"
+    "ERROR_NAMESPACE": "stm:g77b:error",
+    "QUE_URL": "https://sqs.eu-west-1.amazonaws.com/554658909973/g77Bot-dr50",
   }
 }
