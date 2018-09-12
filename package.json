@@ -17,10 +17,10 @@
     "lodash": "^4.17.10",
     "sistemium-telegram": "^1.1.1",
     "sqs-consumer": "^3.4.0",
+    "telegraf": "^3.22.2",
     "aws-sdk": "^2.7.6"
   },
   "devDependencies": {
-    "telegraf": "^3.22.2",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",

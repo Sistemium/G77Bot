@@ -13,6 +13,8 @@ export async function listSaleOrders(ctx) {
 
   const { session: { accessToken: authorization } } = ctx;
 
+  await ctx.replyWithChatAction('typing');
+
   const saleOrders = await findAll('SaleOrder', authorization, { processing: 'draft' });
 
   const outletIds = unique(map(saleOrders, 'outletId'));

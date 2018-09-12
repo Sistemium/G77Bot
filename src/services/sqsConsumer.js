@@ -3,7 +3,7 @@ import log from 'sistemium-telegram/services/log';
 import { SQS } from 'aws-sdk';
 
 const { debug, error } = log('sqsConsumer');
-const { QUE_URL } = process.env;
+const { QUE_URL, GROUP_CHAT_ID } = process.env;
 
 export default function init(bot) {
 
@@ -26,8 +26,17 @@ export default function init(bot) {
 
     try {
 
-      const { userId, message } = JSON.parse(msg.Body);
-      await bot.telegram.sendMessage(userId, message);
+      const payload = JSON.parse(msg.Body);
+
+      const { userId, message } = payload;
+      const { subject, body } = payload;
+
+      if (userId && message) {
+        await bot.telegram.sendMessage(userId, message);
+      } else if (subject && body) {
+        // error('broadcast not implemented', subject, body);
+        await postGroupMessage(bot, subject, body);
+      }
 
       done();
 
@@ -36,5 +45,24 @@ export default function init(bot) {
       done(e);
     }
   }
+
+}
+
+/**
+ * postGroupMessage
+ * @param bot
+ * @param subject
+ * @param body
+ * @returns {Promise<Message>}
+ */
+
+function postGroupMessage(bot, subject, body) {
+
+  const msg = [
+    `🔔 <b>${subject}</b>\n`,
+    Array.isArray(body) ? body.join('\n') : body,
+  ];
+
+  return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), { parse_mode: 'HTML' });
 
 }

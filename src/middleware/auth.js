@@ -7,6 +7,11 @@ export async function auth(ctx) {
 
   const { match, session } = ctx;
 
+  if (!match) {
+    await ctx.reply('Укажите номер вашего мобильного телефона');
+    return;
+  }
+
   const [, phoneNumber] = match;
 
   if (!phoneNumber) {

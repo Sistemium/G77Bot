@@ -26,7 +26,6 @@ Exception handlers
 async function exceptionHandler(ctx, next) {
 
   try {
-    await ctx.replyWithChatAction('typing');
     await next();
   } catch ({ name, message }) {
     error('exceptionHandler', name, message);

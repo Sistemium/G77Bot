@@ -1,9 +1,11 @@
+import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
 import calc from './middleware/calc';
 import * as saleOrders from './middleware/saleOrders';
 
 import * as auth from './middleware/auth';
 
+const { debug } = log('commands');
 
 /**
  * Configures the bot commands
@@ -14,6 +16,7 @@ export default function (bot) {
   bot.command('start', start);
   bot.command('roles', auth.getRoles);
   bot.command('orders', saleOrders.listSaleOrders);
+  bot.command('auth', auth.auth);
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
 
   bot.action(/salOrder_(\d+)_(.+)/, saleOrders.saleOrderActions);
@@ -29,7 +32,17 @@ export default function (bot) {
 
 async function onMessage(ctx) {
 
-  const { session: { auth: waitingForCode } } = ctx;
+  const {
+    message,
+    session: { auth: waitingForCode },
+    chat: { id: chatId },
+    from: { id: fromId },
+  } = ctx;
+
+  if (chatId !== fromId) {
+    debug('ignore chat message', chatId, message.text);
+    return;
+  }
 
   if (waitingForCode) {
     await auth.confirm(ctx);

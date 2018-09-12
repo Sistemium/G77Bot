@@ -3,10 +3,11 @@
     "DEBUG": "stm:*",
     "PHRASE_NOT_IMPLEMENTED": "I don't understand this kind of messages",
     "REDIS_DB": 7,
-    "BOT_USER_NAME": "G77Bot",
+    "BOT_USER_NAME": "Gorod77Bot",
     "DEBUG_NAMESPACE": "stm:g77b",
     "ERROR_NAMESPACE": "stm:g77b:error",
     "QUE_URL": "https://sqs.eu-west-1.amazonaws.com/554658909973/g77Bot-dr50",
-    "API_URL": "https://api.sistemium.com/v4d/dr50"
+    "API_URL": "https://api.sistemium.com/v4d/dr50",
+    "GROUP_CHAT_ID": "-1001141601243"
   }
 }
