@@ -1,0 +1,18 @@
+{
+  "message_id": 347,
+  "from": {
+    "id": 675579257,
+    "is_bot": true,
+    "first_name": "G77Bot",
+    "username": "Gorod77Bot"
+  },
+  "chat": {
+    "id": 543541652,
+    "first_name": "Aleksandr",
+    "last_name": "Levin",
+    "username": "aliovin",
+    "type": "private"
+  },
+  "date": 1536675257,
+  "text": "Выберите действие:"
+}
