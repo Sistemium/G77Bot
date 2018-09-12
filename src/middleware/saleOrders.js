@@ -83,7 +83,8 @@ export async function showSaleOrder(ctx) {
     Markup.callbackButton('Передать в работу', actionData('upload')),
     Markup.callbackButton('Удалить', actionData('delete')),
     Markup.callbackButton('Показать товары', actionData('showArticles')),
-  ]).extra();
+  ])
+    .extra();
 
   const kbReply = await ctx.reply('Выберите действие:', kb);
 
@@ -108,6 +109,6 @@ export async function saleOrderActions(ctx) {
   debug(JSON.stringify(Object.keys(ctx.tg)));
 
   const [, num, actionName] = match;
-  ctx.answerCbQuery(`SaleOrder ${num} ${actionName}`);
+  await ctx.answerCbQuery(`SaleOrder ${num} ${actionName}`);
 
 }
