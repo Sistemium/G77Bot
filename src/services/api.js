@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'https://api.sistemium.com/v4d/dr50';
-// const API_URL = 'http://localhost:9090/api/dr50';
+const { API_URL } = process.env;
 
 export function findAll(name, authorization, params) {
 
