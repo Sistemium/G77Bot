@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const { API_URL } = process.env;
+const { API_URL, STAPI_TOKEN } = process.env;
+
+if (!STAPI_TOKEN) {
+  throw new Error('STAPI_TOKEN is not set');
+}
 
 export function findAll(name, authorization, params) {
 
@@ -25,4 +29,13 @@ export function find(name, authorization, params) {
 
 function apiUrl(name) {
   return `${API_URL}/${name}`;
+}
+
+export function create(name, authorization, attrs) {
+
+  return axios.post(apiUrl(name), attrs, {
+    headers: { authorization: authorization || STAPI_TOKEN },
+  })
+    .then(({ data }) => data);
+
 }
