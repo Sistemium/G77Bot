@@ -1,0 +1,40 @@
+{
+  "message_id": 7,
+  "from": {
+    "id": 543541652,
+    "is_bot": false,
+    "first_name": "Александр",
+    "last_name": "Лёвин",
+    "username": "aliovin",
+    "language_code": "en-LT"
+  },
+  "chat": {
+    "id": -1001173252749,
+    "title": "ИБИС Системиум",
+    "type": "supergroup"
+  },
+  "date": 1536870207,
+  "new_chat_participant": {
+    "id": 555021845,
+    "is_bot": false,
+    "first_name": "Gediminas",
+    "last_name": "Didysis",
+    "username": "alevin_ru"
+  },
+  "new_chat_member": {
+    "id": 555021845,
+    "is_bot": false,
+    "first_name": "Gediminas",
+    "last_name": "Didysis",
+    "username": "alevin_ru"
+  },
+  "new_chat_members": [
+    {
+      "id": 555021845,
+      "is_bot": false,
+      "first_name": "Gediminas",
+      "last_name": "Didysis",
+      "username": "alevin_ru"
+    }
+  ]
+}
