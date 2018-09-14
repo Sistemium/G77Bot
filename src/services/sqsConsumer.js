@@ -1,12 +1,17 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
-import { SQS } from 'aws-sdk';
+import { SQS, config } from 'aws-sdk';
 
 import { create } from './api';
 import { serverDateFormat } from './moments';
 
 const { debug, error } = log('sqsConsumer');
 const { QUE_URL, GROUP_CHAT_ID, CREATE_NEWS } = process.env;
+const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
+
+if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY) {
+  config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY });
+}
 
 export default function init(bot) {
 
@@ -45,7 +50,9 @@ export default function init(bot) {
         if (CREATE_NEWS) {
           const newsMessage = await createNewsMessage(subject, body)
             .catch(error);
-          debug('newsMessage:', newsMessage);
+          if (newsMessage) {
+            debug('newsMessage created:', newsMessage.id);
+          }
         }
 
       }

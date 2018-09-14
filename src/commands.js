@@ -2,6 +2,7 @@ import Markup from 'telegraf/markup';
 import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
 import calc from './middleware/calc';
+import * as members from './middleware/members';
 import * as saleOrders from './middleware/saleOrders';
 import onContact from './middleware/contact';
 import * as auth from './middleware/auth';
@@ -29,6 +30,8 @@ export default function (bot) {
   bot.hears(/^=(\d)([+\-*/])(\d)/, calc);
 
   bot.on('contact', onContact);
+  bot.on('new_chat_members', members.onNewMember);
+  bot.on('left_chat_member', members.onLeftMember);
 
   bot.on('message', onMessage);
 
@@ -53,7 +56,7 @@ async function onMessage(ctx) {
     return;
   }
 
-  const options = Markup.removeKeyboard(true)
+  const options = Markup.removeKeyboard()
     .extra();
 
   debug(options);
