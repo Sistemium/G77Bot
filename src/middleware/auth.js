@@ -39,6 +39,8 @@ export async function auth(ctx) {
 
     debug('auth got id:', id);
 
+    session.tempPhoneNumber = phoneNumber;
+
     session.auth = id;
 
     ctx.reply(res.join(' '));
@@ -75,6 +77,8 @@ export async function confirm(ctx) {
     Object.assign(session, { account, roles, accessToken });
 
     delete session.auth;
+    session.phoneNumber = session.tempPhoneNumber;
+    delete session.tempPhoneNumber;
 
     const { name } = account;
 

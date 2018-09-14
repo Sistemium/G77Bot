@@ -1,8 +1,9 @@
+import Markup from 'telegraf/markup';
 import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
 import calc from './middleware/calc';
 import * as saleOrders from './middleware/saleOrders';
-
+import onContact from './middleware/contact';
 import * as auth from './middleware/auth';
 
 const { debug } = log('commands');
@@ -16,15 +17,18 @@ export default function (bot) {
   bot.command('start', start);
   bot.command('roles', auth.getRoles);
   bot.command('orders', saleOrders.listSaleOrders);
-  bot.command('auth', auth.auth);
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
 
   bot.action(/salOrder_(\d+)_(.+)/, saleOrders.saleOrderActions);
 
-  bot.hears(/^\/auth[ ]?(\d*)$/, auth.auth);
+  bot.hears(/^\/auth[ ](\d+)$/, auth.auth);
+  bot.command('auth', auth.auth);
+
   bot.command('confirm', auth.confirm);
 
   bot.hears(/^=(\d)([+\-*/])(\d)/, calc);
+
+  bot.on('contact', onContact);
 
   bot.on('message', onMessage);
 
@@ -49,6 +53,11 @@ async function onMessage(ctx) {
     return;
   }
 
-  await ctx.reply('Я такое не понимаю пока');
+  const options = Markup.removeKeyboard(true)
+    .extra();
+
+  debug(options);
+
+  await ctx.reply('Я такое не понимаю пока', options);
 
 }
