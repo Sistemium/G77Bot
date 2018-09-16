@@ -1,25 +1,41 @@
 import log from 'sistemium-telegram/services/log';
+import Markup from 'telegraf/markup';
 import * as pha from '../services/auth';
+import validatePhoneNumber from '../services/functions';
 
 const { debug, error } = log('auth');
 
 export async function auth(ctx) {
 
-  const { match, session } = ctx;
+  const { match, session, update: { message: { text } } } = ctx;
 
-  if (!match) {
-    await ctx.reply('Укажите номер вашего мобильного телефона');
-    return;
+  let phoneNumber;
+
+  if (match && Array.isArray(match)) {
+
+    phoneNumber = match.slice(-1)
+      .pop();
+
   }
 
-  const [, phoneNumber] = match;
+  if (!phoneNumber) {
+
+    phoneNumber = text;
+
+  }
+
+  phoneNumber = validatePhoneNumber(phoneNumber);
+
+  const options = Markup.removeKeyboard()
+    .extra();
 
   if (!phoneNumber) {
 
     if (session.account) {
       await getRoles(ctx);
     } else {
-      await ctx.reply('Укажите номер вашего мобильного телефона');
+      session.waitingForPhone = true;
+      await ctx.reply('Укажите номер вашего мобильного телефона', options);
     }
 
     return;
@@ -41,9 +57,11 @@ export async function auth(ctx) {
 
     session.tempPhoneNumber = phoneNumber;
 
-    session.auth = id;
+    session.waitingForCode = id;
 
-    ctx.reply(res.join(' '));
+    delete session.waitingForPhone;
+
+    ctx.reply(res.join(' '), options);
 
   } catch (e) {
     error(e.message);
@@ -56,7 +74,7 @@ export async function confirm(ctx) {
 
   const { message: { text: code }, session } = ctx;
 
-  if (!session.auth) {
+  if (!session.waitingForCode) {
     replyNotAuthorized(ctx);
     return;
   }
@@ -70,13 +88,17 @@ export async function confirm(ctx) {
 
   try {
 
-    const { accessToken } = await pha.confirm(code, session.auth);
+    const { accessToken } = await pha.confirm(code, session.waitingForCode);
 
     const { account, roles } = await pha.roles(accessToken);
 
-    Object.assign(session, { account, roles, accessToken });
+    Object.assign(session, {
+      account,
+      roles,
+      accessToken,
+    });
 
-    delete session.auth;
+    delete session.waitingForCode;
     session.phoneNumber = session.tempPhoneNumber;
     delete session.tempPhoneNumber;
 

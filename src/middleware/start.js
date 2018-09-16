@@ -47,8 +47,6 @@ export default async function (ctx) {
         .resize()
         .extra();
 
-      debug(option);
-
     } else {
 
       res.push(`Вы авторизованы под номером ${session.phoneNumber}`);

@@ -1,4 +1,5 @@
 import * as auth from './auth';
+import validatePhoneNumber from '../services/functions';
 
 export default async function onContact(ctx) {
 
@@ -6,9 +7,7 @@ export default async function onContact(ctx) {
     update: { message: { contact } },
   } = ctx;
 
-  const phoneNumber = contact.phone_number
-    .replace(/^370/, '820')
-    .replace(/^7/, '8');
+  const phoneNumber = validatePhoneNumber(contact.phone_number);
 
   ctx.match = ['', phoneNumber];
 

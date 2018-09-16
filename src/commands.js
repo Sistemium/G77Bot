@@ -26,6 +26,7 @@ export default function (bot) {
   bot.command('auth', auth.auth);
 
   bot.command('confirm', auth.confirm);
+  bot.hears('Ввести другой номер', auth.auth);
 
   bot.hears(/^=(\d)([+\-*/])(\d)/, calc);
 
@@ -41,13 +42,18 @@ async function onMessage(ctx) {
 
   const {
     message,
-    session: { auth: waitingForCode },
+    session: { waitingForCode, waitingForPhone },
     chat: { id: chatId },
     from: { id: fromId },
   } = ctx;
 
   if (chatId !== fromId) {
     debug('ignore chat message', chatId, message.text);
+    return;
+  }
+
+  if (waitingForPhone) {
+    await auth.auth(ctx);
     return;
   }
 
@@ -58,8 +64,6 @@ async function onMessage(ctx) {
 
   const options = Markup.removeKeyboard()
     .extra();
-
-  debug(options);
 
   await ctx.reply('Я такое не понимаю пока', options);
 
