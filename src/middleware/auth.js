@@ -24,18 +24,28 @@ export async function auth(ctx) {
 
   }
 
-  phoneNumber = validatePhoneNumber(phoneNumber);
+  const validatedPhoneNumber = validatePhoneNumber(phoneNumber);
 
   const options = Markup.removeKeyboard()
     .extra();
 
-  if (!phoneNumber) {
+  if (!validatedPhoneNumber) {
 
     if (session.account) {
       await getRoles(ctx);
+      return;
+    }
+
+    session.waitingForPhone = true;
+
+    if (phoneNumber) {
+
+      await ctx.reply('❌ Неверный номер телефона', options);
+
     } else {
-      session.waitingForPhone = true;
+
       await ctx.reply('Укажите номер вашего мобильного телефона', options);
+
     }
 
     return;
@@ -49,7 +59,7 @@ export async function auth(ctx) {
     const id = await pha.login(phoneNumber);
 
     const res = [
-      'Теперь пришлите код, который я отправил в СМС-сообщении',
+      '✅ Теперь пришлите код, который я отправил в СМС-сообщении',
       `на номер ${phoneNumber}`,
     ];
 
@@ -104,10 +114,10 @@ export async function confirm(ctx) {
 
     const { name } = account;
 
-    await ctx.replyHTML(`<b>${name}</b>, добро пожаловать в Телеграм-бота «Город 77»!`);
+    await ctx.replyHTML(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «Город 77»!`);
 
   } catch (e) {
-    await ctx.reply('Неправильный код!');
+    await ctx.reply('❌ Неправильный код!');
   }
 
 
