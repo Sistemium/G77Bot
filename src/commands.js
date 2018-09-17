@@ -1,6 +1,7 @@
 import Markup from 'telegraf/markup';
 import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
+import logout from './middleware/logout';
 import calc from './middleware/calc';
 import * as members from './middleware/members';
 import * as saleOrders from './middleware/saleOrders';
@@ -16,6 +17,7 @@ const { debug } = log('commands');
 export default function (bot) {
 
   bot.command('start', start);
+  bot.command('/logout', logout);
   bot.command('roles', auth.getRoles);
   bot.command('orders', saleOrders.listSaleOrders);
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
