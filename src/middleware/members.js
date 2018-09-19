@@ -1,3 +1,5 @@
+import trim from 'lodash/trim';
+
 /**
  *
  * @param {ContextMessageUpdate} ctx
@@ -7,9 +9,8 @@
 export async function onNewMember(ctx) {
 
   const { message: { new_chat_member: member } } = ctx;
-  const { first_name: firstName, last_name: lastName } = member;
 
-  await ctx.replyWithHTML(`👏 Поприветствуем нового коллегу по имени <b>${firstName} ${lastName}</b>!`);
+  await ctx.replyWithHTML(`👏 Поприветствуем нового коллегу по имени <b>${name(member)}</b>!`);
 
 }
 
@@ -22,8 +23,11 @@ export async function onNewMember(ctx) {
 export async function onLeftMember(ctx) {
 
   const { message: { left_chat_member: member } } = ctx;
-  const { first_name: firstName, last_name: lastName } = member;
 
-  await ctx.replyWithHTML(`😮 Эх, нас покинул <b>${firstName} ${lastName}</b>, ну, удачи ему!`);
+  await ctx.replyWithHTML(`😮 Эх, нас покинул <b>${name(member)}</b>, ну, удачи ему!`);
 
+}
+
+function name({ first_name: firstName, last_name: lastName }) {
+  return trim([firstName, lastName].join(' '));
 }
