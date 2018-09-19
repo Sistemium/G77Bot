@@ -36,9 +36,7 @@ export async function auth(ctx) {
       return;
     }
 
-    session.waitingForPhone = true;
-
-    if (phoneNumber) {
+    if (session.waitingForPhone) {
 
       await ctx.reply('❌ Неверный номер телефона', options);
 
@@ -47,6 +45,8 @@ export async function auth(ctx) {
       await ctx.reply('Укажите номер вашего мобильного телефона', options);
 
     }
+
+    session.waitingForPhone = true;
 
     return;
 

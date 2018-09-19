@@ -29,6 +29,7 @@ export default function (bot) {
 
   bot.command('confirm', auth.confirm);
   bot.hears('Ввести другой номер', auth.auth);
+  bot.hears('Отменить', logout);
 
   bot.hears(/^=(\d)([+\-*/])(\d)/, calc);
 
