@@ -1,7 +1,10 @@
 import log from 'sistemium-telegram/services/log';
-import Markup from 'telegraf/markup';
 
-const { debug, error } = log('start');
+import { isAuthorized, explainAuth } from './auth';
+
+import { orgName } from '../services/org';
+
+const { debug } = log('start');
 
 export default async function (ctx) {
 
@@ -18,46 +21,37 @@ export default async function (ctx) {
 
   debug(userId, firstName, lastName);
 
-  try {
+  const res = [
+    `Здравствуй, <b>${firstName} ${lastName}</b>!`,
+    `Твой ид Телеграм: <b>${userId}</b>`,
+    '',
+  ];
 
-    const res = [
-      `Здравствуй, <b>${firstName} ${lastName}</b>!`,
-      `Твой ид Телеграм <code>${userId}</code>`,
-      '',
-    ];
-
-    let option = {};
-
-    if (!session.phoneNumber) {
-
-      res.push('Требуется авторизация');
-
-      const buttons = [
-        [{
-          text: 'Использовать текущий номер',
-          request_contact: true,
-        }],
-        ['Ввести другой номер'],
-        ['Отменить'],
-      ];
-
-      option = Markup
-        .keyboard(buttons)
-        .oneTime()
-        .resize()
-        .extra();
-
-    } else {
-
-      res.push(`Вы авторизованы под номером ${session.phoneNumber}`);
-
-    }
-
-    await ctx.replyWithHTML(res.join('\n'), option);
-
-  } catch (e) {
-    await ctx.reply('Что-то пошло не так');
-    error(e);
+  if (!isAuthorized(ctx)) {
+    await explainAuth(ctx);
+    return;
   }
+
+  const { salesman, supervisor, org } = session.roles;
+
+  res.push(`Ты авторизовался под номером: <b>${session.phoneNumber}</b>`);
+  res.push(`Организация: <b>${orgName(org)}</b>`);
+
+  const roles = [];
+
+  if (supervisor) {
+    roles.push('Супервайзер');
+  }
+
+  if (salesman) {
+    roles.push('Торговый представитель');
+  }
+
+  if (roles.length) {
+    res.push(`Тебе назначены роли: ${roles.map(role => `<b>${role}</b>`)
+      .join(', ')}`);
+  }
+
+  await ctx.replyWithHTML(res.join('\n'));
 
 }

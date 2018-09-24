@@ -2,6 +2,8 @@ import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
 import { SQS, config } from 'aws-sdk';
 
+// import { findAll } from './users';
+import { userSettings } from './userSettings';
 import { create } from './api';
 import { serverDateFormat } from './moments';
 
@@ -9,8 +11,12 @@ const { debug, error } = log('sqsConsumer');
 const { QUE_URL, GROUP_CHAT_ID, CREATE_NEWS } = process.env;
 const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
 
+
 if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY) {
-  config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY });
+  config.update({
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  });
 }
 
 export default function init(bot) {
@@ -36,8 +42,39 @@ export default function init(bot) {
 
       const payload = JSON.parse(msg.Body);
 
-      const { userId, message } = payload;
+      // const org = QUE_URL.replace('/([^-]*$)', '');
+
+      const { messageType, message } = payload;
       const { subject, body } = payload;
+
+      const { userId } = payload;
+
+      // if (userId) {
+      //
+      //   userId = [userId];
+      //
+      // } else {
+      //
+      //   userId = await findAll(org);
+      //
+      // }
+
+      if (messageType && userId) {
+
+        // for (const id of userId) {
+
+        const t = await userSettings(userId, messageType);
+
+        if (!t) {
+          debug('ignored message with type:', messageType);
+        }
+
+
+        // }
+
+        return done();
+
+      }
 
       if (userId && message) {
 
@@ -57,11 +94,11 @@ export default function init(bot) {
 
       }
 
-      done();
+      return done();
 
     } catch (e) {
       error(e);
-      done(e);
+      return done(e);
     }
   }
 
