@@ -1,12 +1,10 @@
 export default function validatePhoneNumber(phone) {
 
   if (!phone) {
-
     return phone;
-
   }
 
-  let phoneNumber = phone.replace(/[^0-9]+/, '');
+  let phoneNumber = phone.replace(/[^0-9]/g, '');
 
   if (!phoneNumber.match(/\d/g)) {
 
