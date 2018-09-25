@@ -2,7 +2,7 @@ import log from 'sistemium-telegram/services/log';
 import Markup from 'telegraf/markup';
 import * as pha from '../services/auth';
 import validatePhoneNumber from '../services/functions';
-import { addUser } from '../services/users';
+import { addUser, removeUser } from '../services/users';
 import { orgName } from '../services/org';
 
 const { debug, error } = log('auth');
@@ -120,7 +120,9 @@ export async function logout(ctx) {
 
   try {
 
-    const { session } = ctx;
+    const { session, from: { id: userId } } = ctx;
+
+    const { org } = session.roles;
 
     session.phoneNumber = undefined;
     session.waitingForPhone = undefined;
@@ -128,6 +130,8 @@ export async function logout(ctx) {
     session.waitingForCode = undefined;
     session.account = undefined;
     session.roles = undefined;
+
+    await removeUser(org, userId);
 
     await ctx.reply('Ок', options);
 

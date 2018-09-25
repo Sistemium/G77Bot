@@ -1,4 +1,6 @@
-import { hgetallAsync, hsetAsync, hgetAsync } from 'sistemium-telegram/services/redis';
+import {
+  hgetallAsync, hsetAsync, hgetAsync, hdelAsync,
+} from 'sistemium-telegram/services/redis';
 import map from 'lodash/map';
 
 const USERS_KEY = 'users';
@@ -9,6 +11,12 @@ export async function addUser(org, id, data) {
     ...data,
     id,
   }));
+
+}
+
+export async function removeUser(org, id) {
+
+  return hdelAsync(orgKey(org), id);
 
 }
 
