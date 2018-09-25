@@ -39,7 +39,7 @@ export default function (bot) {
   bot.hears('Ввести другой номер', auth.onOtherPhone);
   bot.hears('Отменить', auth.onCancel);
 
-  bot.on('contact', Telegraf.optional(authIsWaitingForPhone, onContact));
+  bot.on('contact', onContact);
   bot.on('message', Telegraf.optional(authIsWaitingForPhone, onContact));
   bot.on('message', Telegraf.optional(authIsWaitingForCode, auth.confirm));
 
