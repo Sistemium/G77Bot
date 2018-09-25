@@ -1,8 +1,9 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
 import { SQS, config } from 'aws-sdk';
+import eachSeries from 'async/eachSeries';
 
-// import { findAll } from './users';
+import { findAll } from './users';
 import { userSettings } from './userSettings';
 import { create } from './api';
 import { serverDateFormat } from './moments';
@@ -42,35 +43,26 @@ export default function init(bot) {
 
       const payload = JSON.parse(msg.Body);
 
-      // const org = QUE_URL.replace('/([^-]*$)', '');
+      const org = QUE_URL.match('[^-]*$');
 
       const { messageType, message } = payload;
       const { subject, body } = payload;
 
       const { userId } = payload;
 
-      // if (userId) {
-      //
-      //   userId = [userId];
-      //
-      // } else {
-      //
-      //   userId = await findAll(org);
-      //
-      // }
+      const users = userId ? [{ id: userId }] : await findAll(org);
 
-      if (messageType && userId) {
+      if (messageType && users.length) {
 
-        // for (const id of userId) {
-
-        const t = await userSettings(userId, messageType);
-
-        if (!t) {
-          debug('ignored message with type:', messageType);
-        }
-
-
-        // }
+        await eachSeries(users, async ({ id }) => {
+          const userSetting = await userSettings(id, messageType);
+          if (!userSetting) {
+            debug('ignored messageType:', messageType, 'for userId:', id);
+            return;
+          }
+          debug(id);
+          await bot.telegram.sendMessage(id, message);
+        });
 
         return done();
 
