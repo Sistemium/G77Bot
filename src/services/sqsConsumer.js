@@ -60,7 +60,6 @@ export default function init(bot) {
             debug('ignored messageType:', messageType, 'for userId:', id);
             return;
           }
-          debug(id);
           await bot.telegram.sendMessage(id, message);
         });
 
@@ -150,7 +149,8 @@ function parseMessageBody(body) {
 
 function formatList(arr) {
 
-  return arr.map(str => `• ${str}`).join('\n');
+  return arr.map(str => `• ${str}`)
+    .join('\n');
 
 }
 
