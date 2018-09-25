@@ -3,6 +3,7 @@ import log from 'sistemium-telegram/services/log';
 import { SQS, config } from 'aws-sdk';
 import eachSeries from 'async/eachSeries';
 
+import map from 'lodash/map';
 import { findAll } from './users';
 import { userSettings } from './userSettings';
 import { create } from './api';
@@ -45,7 +46,7 @@ export default function init(bot) {
 
       const org = QUE_URL.match('[^-]*$');
 
-      const { messageType, message } = payload;
+      const { messageType, message, mediaGroup } = payload;
       const { subject, body } = payload;
 
       const { userId } = payload;
@@ -62,6 +63,19 @@ export default function init(bot) {
           }
           await bot.telegram.sendMessage(id, message);
         });
+
+        return done();
+
+      }
+
+      if (mediaGroup) {
+
+        const group = map(mediaGroup, ({ src }) => ({
+          media: src,
+          type: 'photo',
+        }));
+
+        postMediaGroup(bot, group);
 
         return done();
 
@@ -116,6 +130,16 @@ function postGroupMessage(bot, subject, body) {
   };
 
   return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), options);
+
+}
+
+function postMediaGroup(bot, mediaGroup) {
+
+  const options = {
+    disable_notification: !isNotifyTime(),
+  };
+
+  return bot.telegram.sendMediaGroup(GROUP_CHAT_ID, mediaGroup, options);
 
 }
 
