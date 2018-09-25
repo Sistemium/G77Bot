@@ -6,6 +6,8 @@ import calc from './middleware/calc';
 import * as members from './middleware/members';
 import * as saleOrders from './middleware/saleOrders';
 import onContact from './middleware/contact';
+import * as queues from './middleware/queues';
+
 import * as auth from './middleware/auth';
 import * as subscriptions from './middleware/subscriptions';
 
@@ -16,6 +18,9 @@ const { debug } = log('commands');
  * @param {Composer} bot
  */
 export default function (bot) {
+
+  bot.hears(/^\/add[ _]queue (.+)$/, queues.add);
+  bot.hears(/^\/list[ _]queues$/, queues.list);
 
   bot.command('start', start);
   bot.command('logout', auth.logout);

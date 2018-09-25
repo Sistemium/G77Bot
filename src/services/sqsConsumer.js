@@ -6,7 +6,7 @@ import eachSeries from 'async/eachSeries';
 import { findAll } from './users';
 import { userSettings } from './userSettings';
 import { create } from './api';
-import { serverDateFormat } from './moments';
+import { serverDateFormat, isNotifyTime } from './moments';
 
 const { debug, error } = log('sqsConsumer');
 const { QUE_URL, GROUP_CHAT_ID, CREATE_NEWS } = process.env;
@@ -107,11 +107,16 @@ export default function init(bot) {
 function postGroupMessage(bot, subject, body) {
 
   const msg = [
-    `🔔 <b>${subject}</b>\n`,
+    `${subjectEmoji(subject)} <b>${subject}</b>\n`,
     parseMessageBody(body),
   ];
 
-  return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), { parse_mode: 'HTML' });
+  const options = {
+    parse_mode: 'HTML',
+    disable_notification: !isNotifyTime(),
+  };
+
+  return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), options);
 
 }
 
@@ -140,5 +145,25 @@ function createNewsMessage(subject, body) {
 }
 
 function parseMessageBody(body) {
-  return Array.isArray(body) ? body.join('\n') : body;
+  return Array.isArray(body) ? formatList(body) : body;
+}
+
+function formatList(arr) {
+
+  return arr.map(str => `• ${str}`).join('\n');
+
+}
+
+
+function subjectEmoji(subject) {
+
+  switch (subject) {
+    case 'Новые товары на складе':
+      return '🌟';
+    case 'Больше нет на складе':
+      return '⚠️';
+    default:
+      return '🔔';
+  }
+
 }
