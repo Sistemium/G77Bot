@@ -1,11 +1,15 @@
+import Markup from 'telegraf/markup';
+import Telegraf from 'telegraf';
 import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
 import calc from './middleware/calc';
 import * as members from './middleware/members';
 import * as saleOrders from './middleware/saleOrders';
+import onContact from './middleware/contact';
 import * as queues from './middleware/queues';
 
 import * as auth from './middleware/auth';
+import * as subscriptions from './middleware/subscriptions';
 
 const { debug } = log('commands');
 
@@ -19,15 +23,37 @@ export default function (bot) {
   bot.hears(/^\/list[ _]queues$/, queues.list);
 
   bot.command('start', start);
+  bot.command('logout', auth.logout);
   bot.command('roles', auth.getRoles);
   bot.command('orders', saleOrders.listSaleOrders);
-  bot.command('auth', auth.auth);
+
+  bot.command('subscriptions', subscriptions.showSettings);
+  bot.action(/toggle_(.+)_(on|off)/, subscriptions.onToggleSetting);
+
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
 
   bot.action(/salOrder_(\d+)_(.+)/, saleOrders.saleOrderActions);
 
-  bot.hears(/^\/auth[ ]?(\d*)$/, auth.auth);
+  /*
+  Authorization
+   */
+
+  bot.hears(/^\/auth[ ](\d+)$/, auth.auth);
+  bot.command('auth', Telegraf.branch(auth.isAuthorized, start, auth.auth));
+
+  bot.hears('Ввести другой номер', auth.onOtherPhone);
+  bot.hears('Отменить', auth.onCancel);
+
+  bot.on('contact', onContact);
+  bot.on('message', Telegraf.optional(authIsWaitingForPhone, onContact));
+  bot.on('message', Telegraf.optional(authIsWaitingForCode, auth.confirm));
+
   bot.command('confirm', auth.confirm);
+
+
+  /*
+  Test thing
+   */
 
   bot.hears(/^=(\d)([+\-*/])(\d)/, calc);
 
@@ -38,11 +64,18 @@ export default function (bot) {
 
 }
 
+function authIsWaitingForCode(ctx) {
+  return ctx.session.waitingForCode;
+}
+
+function authIsWaitingForPhone(ctx) {
+  return ctx.session.waitingForPhone;
+}
+
 async function onMessage(ctx) {
 
   const {
     message,
-    session: { auth: waitingForCode },
     chat: { id: chatId },
     from: { id: fromId },
   } = ctx;
@@ -52,11 +85,9 @@ async function onMessage(ctx) {
     return;
   }
 
-  if (waitingForCode) {
-    await auth.confirm(ctx);
-    return;
-  }
+  const options = Markup.removeKeyboard()
+    .extra();
 
-  await ctx.reply('Я такое не понимаю пока');
+  await ctx.reply('Я такое не понимаю пока', options);
 
 }

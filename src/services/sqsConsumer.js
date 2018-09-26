@@ -1,7 +1,11 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
 import { SQS, config } from 'aws-sdk';
+import eachSeries from 'async/eachSeries';
 
+import map from 'lodash/map';
+import { findAll } from './users';
+import { userSettings } from './userSettings';
 import { create } from './api';
 import { serverDateFormat, isNotifyTime } from './moments';
 
@@ -9,8 +13,12 @@ const { debug, error } = log('sqsConsumer');
 const { QUE_URL, GROUP_CHAT_ID, CREATE_NEWS } = process.env;
 const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
 
+
 if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY) {
-  config.update({ accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY });
+  config.update({
+    accessKeyId: AWS_ACCESS_KEY_ID,
+    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  });
 }
 
 export default function init(bot) {
@@ -36,8 +44,48 @@ export default function init(bot) {
 
       const payload = JSON.parse(msg.Body);
 
-      const { userId, message } = payload;
+      const org = QUE_URL.match('[^-]*$');
+
+      const { messageType, message, mediaGroup } = payload;
       const { subject, body } = payload;
+
+      const { userId } = payload;
+
+      const users = userId ? [{ id: userId }] : await findAll(org);
+
+      if (messageType && users.length) {
+
+        await eachSeries(users, async ({ id }) => {
+          const userSetting = await userSettings(id, messageType);
+          if (!userSetting) {
+            debug('ignored messageType:', messageType, 'for userId:', id);
+            return;
+          }
+          await bot.telegram.sendMessage(id, message);
+        });
+
+        return done();
+
+      }
+
+      if (mediaGroup) {
+
+        const group = map(mediaGroup, ({ src }) => ({
+          media: src,
+          type: 'photo',
+        }));
+
+        if (subject) {
+
+          postGroupMessage(bot, subject);
+
+        }
+
+        postMediaGroup(bot, group);
+
+        return done();
+
+      }
 
       if (userId && message) {
 
@@ -57,11 +105,11 @@ export default function init(bot) {
 
       }
 
-      done();
+      return done();
 
     } catch (e) {
       error(e);
-      done(e);
+      return done(e);
     }
   }
 
@@ -88,6 +136,16 @@ function postGroupMessage(bot, subject, body) {
   };
 
   return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), options);
+
+}
+
+function postMediaGroup(bot, mediaGroup) {
+
+  const options = {
+    disable_notification: !isNotifyTime(),
+  };
+
+  return bot.telegram.sendMediaGroup(GROUP_CHAT_ID, mediaGroup, options);
 
 }
 
@@ -121,7 +179,8 @@ function parseMessageBody(body) {
 
 function formatList(arr) {
 
-  return arr.map(str => `• ${str}`).join('\n');
+  return arr.map(str => `• ${str}`)
+    .join('\n');
 
 }
 
@@ -133,6 +192,8 @@ function subjectEmoji(subject) {
       return '🌟';
     case 'Больше нет на складе':
       return '⚠️';
+    case 'Новые товары в каталоге':
+      return '💥';
     default:
       return '🔔';
   }
