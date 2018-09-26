@@ -75,6 +75,12 @@ export default function init(bot) {
           type: 'photo',
         }));
 
+        if (subject) {
+
+          postGroupMessage(bot, subject);
+
+        }
+
         postMediaGroup(bot, group);
 
         return done();
@@ -186,6 +192,8 @@ function subjectEmoji(subject) {
       return '🌟';
     case 'Больше нет на складе':
       return '⚠️';
+    case 'Новые товары в каталоге':
+      return '💥';
     default:
       return '🔔';
   }
