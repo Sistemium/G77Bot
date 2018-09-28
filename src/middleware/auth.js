@@ -97,13 +97,14 @@ export async function confirm(ctx) {
     session.phoneNumber = session.tempPhoneNumber;
     delete session.tempPhoneNumber;
 
-    const { name } = account;
+    const { name, authId } = account;
 
     await addUser(org, userId, {
       org,
       phoneNumber: session.phoneNumber,
       name,
       salesman,
+      authId,
     });
 
     await ctx.replyHTML(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`);
