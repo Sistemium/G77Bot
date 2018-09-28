@@ -50,9 +50,16 @@ export default function init(bot) {
         subject,
         body,
         userId,
+        authId,
+        salesman,
       } = payload;
 
-      const allUsers = userId ? [userId] : await generateUserArray(org, messageType);
+      const allUsers = userId ? [userId] : await generateUserArray(
+        org,
+        messageType,
+        authId,
+        salesman,
+      );
 
       const users = await filterUsers(allUsers, messageType);
 
@@ -136,12 +143,44 @@ async function filterUsers(users, messageType) {
 
 }
 
-async function generateUserArray(org, messageType) {
+async function generateUserArray(org, messageType, authId, salesman) {
 
   if (Object.keys(subscriptionSettings())
     .includes(messageType)) {
 
-    return (await findAll(org)).map(user => user.id);
+    const result = (await findAll(org)).reduce((users, user) => {
+
+      if (authId && user.authId !== authId) {
+
+        return users;
+
+      }
+
+      if (salesman && user.salesman !== salesman) {
+
+        return users;
+
+      }
+
+      users.push(user.id);
+
+      return users;
+
+    }, []);
+
+    if (authId && !result.length) {
+
+      debug(`no user with authID: ${authId}`);
+
+    }
+
+    if (salesman && !result.length) {
+
+      debug(`no user with salesman: ${salesman}`);
+
+    }
+
+    return result;
 
   }
 
