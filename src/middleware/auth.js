@@ -85,7 +85,7 @@ export async function confirm(ctx) {
 
     const { accessToken } = await pha.confirm(code, session.waitingForCode);
 
-    const { account, roles, roles: { org } } = await pha.roles(accessToken);
+    const { account, roles, roles: { org, salesman } } = await pha.roles(accessToken);
 
     Object.assign(session, {
       account,
@@ -97,11 +97,14 @@ export async function confirm(ctx) {
     session.phoneNumber = session.tempPhoneNumber;
     delete session.tempPhoneNumber;
 
-    const { name } = account;
+    const { name, authId } = account;
 
     await addUser(org, userId, {
       org,
       phoneNumber: session.phoneNumber,
+      name,
+      salesman,
+      authId,
     });
 
     await ctx.replyHTML(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`);
