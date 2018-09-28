@@ -1,16 +1,16 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
 import { SQS, config } from 'aws-sdk';
-import eachSeries from 'async/eachSeries';
+import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
+import remove from 'lodash/remove';
 import { findAll } from './users';
-import { userSettings } from './userSettings';
-import { create } from './api';
-import { serverDateFormat, isNotifyTime } from './moments';
+import { userSettings, subscriptionSettings } from './userSettings';
+import { isNotifyTime } from './moments';
 
 const { debug, error } = log('sqsConsumer');
-const { QUE_URL, GROUP_CHAT_ID, CREATE_NEWS } = process.env;
+const { QUE_URL, GROUP_CHAT_ID } = process.env;
 const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
 
 
@@ -43,70 +43,28 @@ export default function init(bot) {
     try {
 
       const payload = JSON.parse(msg.Body);
-
       const org = QUE_URL.match('[^-]*$');
+      const {
+        messageType,
+        message,
+        mediaGroup,
+        subject,
+        body,
+        userId,
+      } = payload;
 
-      const { messageType, message, mediaGroup } = payload;
-      const { subject, body } = payload;
+      const users = userId ? [userId] : await generateUserArray(org, messageType);
 
-      const { userId } = payload;
+      await filterUsers(users, messageType);
 
-      const users = userId ? [{ id: userId }] : await findAll(org);
-
-      if (messageType && users.length) {
-
-        await eachSeries(users, async ({ id }) => {
-          const userSetting = await userSettings(id, messageType);
-          if (!userSetting) {
-            debug('ignored messageType:', messageType, 'for userId:', id);
-            return;
-          }
-          await bot.telegram.sendMessage(id, message);
-        });
-
-        return done();
-
-      }
-
-      if (mediaGroup) {
-
-        const group = map(mediaGroup, ({ src }) => ({
-          media: src,
-          type: 'photo',
-        }));
-
-        if (subject) {
-
-          postGroupMessage(bot, subject);
-
-        }
-
-        postMediaGroup(bot, group);
-
-        return done();
-
-      }
-
-      if (userId && message) {
-
-        await bot.telegram.sendMessage(userId, message);
-
-      } else if (subject && body) {
-
-        await postGroupMessage(bot, subject, body);
-
-        if (CREATE_NEWS) {
-          const newsMessage = await createNewsMessage(subject, body)
-            .catch(error);
-          if (newsMessage) {
-            debug('newsMessage created:', newsMessage.id);
-          }
-        }
-
-      }
+      await postMessage(bot, users, {
+        message,
+        mediaGroup,
+        subject,
+        body,
+      });
 
       return done();
-
     } catch (e) {
       error(e);
       return done(e);
@@ -115,62 +73,76 @@ export default function init(bot) {
 
 }
 
-/**
- * postGroupMessage
- * @param bot
- * @param subject
- * @param body
- * @returns {Promise<Message>}
- */
+async function postMessage(bot, ids, options) {
 
-function postGroupMessage(bot, subject, body) {
+  const {
+    message, mediaGroup, subject, body,
+  } = options;
 
-  const msg = [
-    `${subjectEmoji(subject)} <b>${subject}</b>\n`,
-    parseMessageBody(body),
-  ];
-
-  const options = {
+  const opts = {
+    disable_notification: !isNotifyTime(),
     parse_mode: 'HTML',
-    disable_notification: !isNotifyTime(),
   };
 
-  return bot.telegram.sendMessage(GROUP_CHAT_ID, msg.join('\n'), options);
+  await eachSeriesAsync(ids, async id => {
+
+    if (mediaGroup) {
+
+      await bot.telegram.sendMessage(id, `${subjectEmoji(subject)} <b>${subject}</b>`, opts);
+
+      const msg = map(mediaGroup, ({ src }) => ({
+        media: src,
+        type: 'photo',
+      }));
+
+      await bot.telegram.sendMediaGroup(id, msg, opts);
+
+    } else {
+
+      const msg = message
+        || [
+          `${subjectEmoji(subject)} <b>${subject}</b>\n`,
+          parseMessageBody(body),
+        ].join('\n');
+
+      bot.telegram.sendMessage(id, msg, opts);
+
+    }
+
+  });
 
 }
 
-function postMediaGroup(bot, mediaGroup) {
+async function filterUsers(users, messageType) {
 
-  const options = {
-    disable_notification: !isNotifyTime(),
-  };
+  if (messageType && users.length) {
 
-  return bot.telegram.sendMediaGroup(GROUP_CHAT_ID, mediaGroup, options);
+    await eachSeriesAsync(users, async id => {
+      const userSetting = await userSettings(id, messageType);
+      if (!userSetting) {
+
+        debug('ignored messageType:', messageType, 'for userId:', id);
+
+        remove(users, user => user === id);
+
+      }
+
+    });
+
+  }
 
 }
 
+async function generateUserArray(org, messageType) {
 
-/**
- * createNewsMessage
- * @param subject
- * @param body
- * @returns {Promise<Object>}
- */
+  if (Object.keys(subscriptionSettings())
+    .includes(messageType)) {
 
-function createNewsMessage(subject, body) {
+    return (await findAll(org)).map(user => user.id);
 
-  const today = serverDateFormat();
+  }
 
-  const newsMessage = {
-    subject,
-    body: parseMessageBody(body),
-    dateB: today,
-    dateE: today,
-    appVersion: '1.0',
-  };
-
-  return create('NewsMessage', false, newsMessage);
-
+  return [GROUP_CHAT_ID];
 }
 
 function parseMessageBody(body) {
@@ -184,7 +156,6 @@ function formatList(arr) {
 
 }
 
-
 function subjectEmoji(subject) {
 
   switch (subject) {
@@ -197,5 +168,4 @@ function subjectEmoji(subject) {
     default:
       return '🔔';
   }
-
 }
