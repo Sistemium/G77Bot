@@ -4,7 +4,6 @@ import { SQS, config } from 'aws-sdk';
 import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
-import remove from 'lodash/remove';
 import { findAll } from './users';
 import { userSettings, subscriptionSettings } from './userSettings';
 import { isNotifyTime } from './moments';
@@ -53,9 +52,9 @@ export default function init(bot) {
         userId,
       } = payload;
 
-      const users = userId ? [userId] : await generateUserArray(org, messageType);
+      const allUsers = userId ? [userId] : await generateUserArray(org, messageType);
 
-      await filterUsers(users, messageType);
+      const users = await filterUsers(allUsers, messageType);
 
       await postMessage(bot, users, {
         message,
@@ -115,21 +114,25 @@ async function postMessage(bot, ids, options) {
 
 async function filterUsers(users, messageType) {
 
-  if (messageType && users.length) {
-
-    await eachSeriesAsync(users, async id => {
-      const userSetting = await userSettings(id, messageType);
-      if (!userSetting) {
-
-        debug('ignored messageType:', messageType, 'for userId:', id);
-
-        remove(users, user => user === id);
-
-      }
-
-    });
-
+  if (!messageType || !users.length) {
+    return users;
   }
+
+  const res = [];
+
+  await eachSeriesAsync(users, async id => {
+
+    const userSetting = await userSettings(id, messageType);
+
+    if (userSetting) {
+      res.push(id);
+    } else {
+      debug('ignored messageType:', messageType, 'for userId:', id);
+    }
+
+  });
+
+  return res;
 
 }
 
