@@ -4,6 +4,7 @@ import { SQS, config } from 'aws-sdk';
 import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
+import filter from 'lodash/filter';
 import { findAll } from './users';
 import { userSettings, subscriptionSettings } from './userSettings';
 import { isNotifyTime } from './moments';
@@ -145,46 +146,25 @@ async function filterUsers(users, messageType) {
 
 async function generateUserArray(org, messageType, authId, salesman) {
 
-  if (Object.keys(subscriptionSettings())
-    .includes(messageType)) {
-
-    const result = (await findAll(org)).reduce((users, user) => {
-
-      if (authId && user.authId !== authId) {
-
-        return users;
-
-      }
-
-      if (salesman && user.salesman !== salesman) {
-
-        return users;
-
-      }
-
-      users.push(user.id);
-
-      return users;
-
-    }, []);
-
-    if (authId && !result.length) {
-
-      debug(`no user with authID: ${authId}`);
-
-    }
-
-    if (salesman && !result.length) {
-
-      debug(`no user with salesman: ${salesman}`);
-
-    }
-
-    return result;
-
+  if (!subscriptionSettings()[messageType]) {
+    return [GROUP_CHAT_ID];
   }
 
-  return [GROUP_CHAT_ID];
+  const result = filter(
+    await findAll(org),
+    user => (authId && user.authId === authId) || (salesman && user.salesman === salesman),
+  );
+
+  if (authId && !result.length) {
+    debug(`no user with authID: ${authId}`);
+  }
+
+  if (salesman && !result.length) {
+    debug(`no user with salesman: ${salesman}`);
+  }
+
+  return map(result, 'id');
+
 }
 
 function parseMessageBody(body) {
