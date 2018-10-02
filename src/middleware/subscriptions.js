@@ -56,11 +56,10 @@ function settingsView(settings) {
 
   });
 
-  const keyboard = Markup.inlineKeyboard(buttons)
-    .extra();
-  const reply = 'Ваши настройки уведомлений:';
+  const keyboard = Markup.inlineKeyboard(buttons).extra();
+  const reply = 'Твои настройки уведомлений:';
 
-  debug(JSON.stringify(keyboard));
+  // debug(JSON.stringify(keyboard));
 
   return {
     reply,
