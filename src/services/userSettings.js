@@ -14,6 +14,10 @@ const ALL_SETTINGS = {
     label: 'Статусы договоров',
     defaultValue: true,
   },
+  StockGone: {
+    label: 'Больше нет на складе',
+    defaultValue: false,
+  },
 };
 
 
