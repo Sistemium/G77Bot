@@ -49,7 +49,15 @@ export async function list(ctx) {
 
   debug('list', queues.length);
 
-  const res = queues.map(JSON.stringify).join('\n');
+  const res = queues.map(JSON.stringify)
+    .join('\n');
+
+  if (!res) {
+
+    await ctx.replyWithHTML('Нет сохраненных адресов');
+
+    return;
+  }
 
   await ctx.replyWithHTML(res);
 
