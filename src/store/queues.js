@@ -10,3 +10,7 @@ export async function getAll() {
 export async function save(id, data) {
   return redis.save(KEY, id, data);
 }
+
+export async function del(id) {
+  return redis.del(KEY, id);
+}

@@ -21,6 +21,7 @@ export default function (bot) {
 
   bot.hears(/^\/add[ _]queue (.+)$/, queues.add);
   bot.hears(/^\/list[ _]queues$/, queues.list);
+  bot.hears(/^\/remove[ _]queue$/, queues.remove);
 
   bot.command('start', start);
   bot.command('logout', auth.logout);

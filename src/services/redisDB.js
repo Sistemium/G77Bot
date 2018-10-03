@@ -10,3 +10,8 @@ export async function save(hashName, id, data) {
   return redis.hsetAsync(hashName, id, JSON.stringify(data))
     .then(() => ({ ...data, id }));
 }
+
+export async function del(hashName, id) {
+  return redis.hdelAsync(hashName, id)
+    .then(() => ({ id }));
+}
