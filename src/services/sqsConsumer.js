@@ -1,6 +1,7 @@
 import Consumer from 'sqs-consumer';
 import log from 'sistemium-telegram/services/log';
-import { SQS, config } from 'aws-sdk';
+import bot from 'sistemium-telegram/services/bot';
+import { SQS } from 'aws-sdk';
 import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
@@ -8,42 +9,80 @@ import filter from 'lodash/filter';
 import { findAll } from './users';
 import { userSettings, subscriptionSettings } from './userSettings';
 import { isNotifyTime } from './moments';
+import { getAll } from '../store/queues';
 
 const { debug, error } = log('sqsConsumer');
-const { QUE_URL, GROUP_CHAT_ID } = process.env;
-const { AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
+
+const { telegram } = bot;
+
+/**
+ * SqsConsumer static storage
+ * @type {Object.<String,SqsConsumer>}}
+ */
+const consumers = {};
 
 
-if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY) {
-  config.update({
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY,
-  });
-}
+class SqsConsumer {
 
-export default function init(bot) {
+  constructor(config) {
 
-  const sqs = Consumer.create({
-    queueUrl: QUE_URL,
-    handleMessage,
-    sqs: new SQS({ region: 'eu-west-1' }),
-  });
+    this.groupChatId = config.groupChatId;
+    this.queueUrl = config.queueUrl;
 
-  sqs.on('error', error);
-  sqs.on('processing_error', error);
+    this.sqs = Consumer.create({
+      queueUrl: config.queueUrl,
+      handleMessage: (msg, done) => this.messageHandler(msg, done),
+      sqs: new SQS({ region: 'eu-west-1' }),
+    });
 
-  sqs.start();
+    this.sqs.on('error', error);
+    this.sqs.on('processing_error', error);
 
-  debug('started');
+    this.sqs.start();
 
-  async function handleMessage(msg, done) {
+    debug('started');
+
+  }
+
+  remove() {
+    this.sqs.stop();
+  }
+
+  async generateUserArray(org, messageType, authId, salesman) {
+
+    if (!subscriptionSettings()[messageType]) {
+      return [this.groupChatId];
+    }
+
+    const result = filter(
+      await findAll(org),
+      user => (authId && user.authId === authId)
+        || (salesman && user.salesman === salesman)
+        || (!salesman && !authId),
+    );
+
+    if (authId && !result.length) {
+      debug(`no user with authID: ${authId}`);
+    }
+
+    if (salesman && !result.length) {
+      debug(`no user with salesman: ${salesman}`);
+    }
+
+    return map(result, 'id');
+
+  }
+
+  async messageHandler(msg, done) {
+
+    const { queueUrl } = this;
 
     debug('got message');
 
     try {
 
       const payload = JSON.parse(msg.Body);
-      const org = QUE_URL.match('[^-]*$');
+      const org = queueUrl.match('[^-]*$');
       const {
         messageType,
         message,
@@ -55,16 +94,17 @@ export default function init(bot) {
         salesman,
       } = payload;
 
-      const allUsers = userId ? [userId] : await generateUserArray(
+      const allUsers = userId ? [userId] : await this.generateUserArray(
         org,
         messageType,
         authId,
         salesman,
       );
 
+      debug(allUsers);
       const users = await filterUsers(allUsers, messageType);
 
-      await postMessage(bot, users, {
+      await postMessage(users, {
         message,
         mediaGroup,
         subject,
@@ -76,11 +116,46 @@ export default function init(bot) {
       error(e);
       return done(e);
     }
+
   }
 
 }
 
-async function postMessage(bot, ids, options) {
+
+export async function setupSqsConsumers() {
+
+  const queues = await getAll();
+
+  queues.forEach(queue => {
+
+    consumers[queue.id] = new SqsConsumer({
+      groupChatId: queue.id,
+      queueUrl: queue.url,
+    });
+
+  });
+
+}
+
+export async function addSqsConsumer(groupChatId, queUrl) {
+
+  consumers[groupChatId] = new SqsConsumer(groupChatId, queUrl);
+
+}
+
+export async function removeSqsConsumer(groupChatId) {
+
+  const consumer = consumers[groupChatId];
+
+  if (consumer) {
+    delete consumers[groupChatId];
+    consumer.remove();
+  }
+
+}
+
+
+async function postMessage(ids, options) {
 
   const {
     message, mediaGroup, subject, body,
@@ -95,24 +170,23 @@ async function postMessage(bot, ids, options) {
 
     if (mediaGroup) {
 
-      await bot.telegram.sendMessage(id, `${subjectEmoji(subject)} <b>${subject}</b>`, opts);
+      await telegram.sendMessage(id, `${subjectEmoji(subject)} <b>${subject}</b>`, opts);
 
       const msg = map(mediaGroup, ({ src }) => ({
         media: src,
         type: 'photo',
       }));
 
-      await bot.telegram.sendMediaGroup(id, msg, opts);
+      await telegram.sendMediaGroup(id, msg, opts);
 
     } else {
 
-      const msg = message
-        || [
-          `${subjectEmoji(subject)} <b>${subject}</b>\n`,
-          parseMessageBody(body),
-        ].join('\n');
+      const msg = message || [
+        `${subjectEmoji(subject)} <b>${subject}</b>\n`,
+        parseMessageBody(body),
+      ].join('\n');
 
-      bot.telegram.sendMessage(id, msg, opts);
+      telegram.sendMessage(id, msg, opts);
 
     }
 
@@ -141,29 +215,6 @@ async function filterUsers(users, messageType) {
   });
 
   return res;
-
-}
-
-async function generateUserArray(org, messageType, authId, salesman) {
-
-  if (!subscriptionSettings()[messageType]) {
-    return [GROUP_CHAT_ID];
-  }
-
-  const result = filter(
-    await findAll(org),
-    user => (authId && user.authId === authId) || (salesman && user.salesman === salesman),
-  );
-
-  if (authId && !result.length) {
-    debug(`no user with authID: ${authId}`);
-  }
-
-  if (salesman && !result.length) {
-    debug(`no user with salesman: ${salesman}`);
-  }
-
-  return map(result, 'id');
 
 }
 

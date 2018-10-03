@@ -1,5 +1,7 @@
 import log from 'sistemium-telegram/services/log';
 import { getAll, save, del } from '../store/queues';
+import { addSqsConsumer, removeSqsConsumer } from '../services/sqsConsumer';
+
 
 const { debug } = log('queues');
 
@@ -18,6 +20,8 @@ export async function add(ctx) {
   debug('add', chatId, url);
 
   await save(chatId, { url });
+
+  addSqsConsumer(chatId, url);
 
   await ctx.replyWithHTML('Added');
 
