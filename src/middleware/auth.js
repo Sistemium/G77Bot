@@ -167,6 +167,9 @@ export function isAuthorized(ctx) {
 
 export async function explainAuth(ctx) {
 
+  const { session } = ctx;
+  session.waitingForPhone = true;
+
   const reply = 'Ты должен авторизоваться, чтобы работать со мной. Пришли свой номер телефона.';
 
   const buttons = [
