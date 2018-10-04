@@ -6,10 +6,10 @@ import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
 import filter from 'lodash/filter';
-import { findAll } from './users';
+import * as usersDb from './users';
 import { userSettings, subscriptionSettings } from './userSettings';
 import { isNotifyTime } from './moments';
-import { getAll } from '../store/queues';
+import * as queuesDb from '../store/queues';
 
 const { debug, error } = log('sqsConsumer');
 
@@ -58,7 +58,7 @@ class SqsConsumer {
     }
 
     const result = filter(
-      await findAll(org),
+      await usersDb.findAll(org),
       user => (authId && user.authId === authId)
         || (salesman && user.salesman === salesman)
         || (!salesman && !authId),
@@ -127,7 +127,7 @@ class SqsConsumer {
 
 export async function setupSqsConsumers() {
 
-  const queues = await getAll();
+  const queues = await queuesDb.findAll();
 
   queues.forEach(queue => {
 

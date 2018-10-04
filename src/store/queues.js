@@ -1,16 +1,15 @@
-import * as redis from '../services/redisDB';
+import * as db from 'sistemium-telegram/services/redisDB';
 
 const KEY = 'queues';
 
-export async function getAll() {
-  return redis.getAll(KEY);
+export async function findAll() {
+  return db.findAll(KEY);
 }
 
-
 export async function save(id, data) {
-  return redis.save(KEY, id, data);
+  return db.save(KEY, id, data);
 }
 
 export async function del(id) {
-  return redis.del(KEY, id);
+  return db.destroy(KEY, id);
 }

@@ -1,5 +1,5 @@
 import log from 'sistemium-telegram/services/log';
-import { getAll, save, del } from '../store/queues';
+import { findAll, save, del } from '../store/queues';
 import { addSqsConsumer, removeSqsConsumer } from '../services/sqsConsumer';
 
 
@@ -49,7 +49,7 @@ export async function remove(ctx) {
 
 export async function list(ctx) {
 
-  const queues = await getAll();
+  const queues = await findAll();
 
   debug('list', queues.length);
 
