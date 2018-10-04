@@ -4,11 +4,9 @@ import * as pha from '../services/auth';
 import validatePhoneNumber from '../services/functions';
 import { addUser, removeUser } from '../services/users';
 import { orgName } from '../services/org';
+import { settingsOptions } from '../services/keyboard';
 
 const { debug, error } = log('auth');
-
-const REMOVE_KEYBOARD = Markup.removeKeyboard()
-  .extra();
 
 export async function auth(ctx) {
 
@@ -61,7 +59,7 @@ export async function authWithPhone(ctx, phoneNumberNotValidated) {
     `на номер ${phoneNumber}`,
   ].join(' ');
 
-  await ctx.reply(reply, REMOVE_KEYBOARD);
+  await ctx.reply(reply, settingsOptions());
 
 }
 
@@ -118,9 +116,6 @@ export async function confirm(ctx) {
 
 export async function logout(ctx) {
 
-  const options = Markup.removeKeyboard()
-    .extra();
-
   try {
 
     const { session, from: { id: userId } } = ctx;
@@ -136,10 +131,10 @@ export async function logout(ctx) {
 
     await removeUser(org, userId);
 
-    await ctx.reply('Ок', options);
+    await ctx.reply('Ок', settingsOptions());
 
   } catch (e) {
-    await ctx.reply('Что-то пошло не так', options);
+    await ctx.reply('Что-то пошло не так', settingsOptions());
     error(e);
   }
 
@@ -199,14 +194,14 @@ export async function onCancel(ctx) {
   delete session.waitingForCode;
   delete session.tempPhoneNumber;
 
-  await ctx.reply('Хорошо, потом авторизуешься', REMOVE_KEYBOARD);
+  await ctx.reply('Хорошо, потом авторизуешься', settingsOptions());
 
 }
 
 export async function onOtherPhone(ctx) {
   const { session } = ctx;
   session.waitingForPhone = true;
-  await ctx.reply('Напиши номер телефона через 8ку или +7', REMOVE_KEYBOARD);
+  await ctx.reply('Напиши номер телефона через 8ку или +7', settingsOptions());
 }
 
 function replyNotAuthorized(ctx) {

@@ -1,4 +1,3 @@
-import Markup from 'telegraf/markup';
 import Telegraf from 'telegraf';
 import log from 'sistemium-telegram/services/log';
 import start from './middleware/start';
@@ -8,6 +7,7 @@ import * as saleOrders from './middleware/saleOrders';
 import onContact from './middleware/contact';
 import * as queues from './middleware/queues';
 
+import { settingsOptions } from './services/keyboard';
 import * as auth from './middleware/auth';
 import * as subscriptions from './middleware/subscriptions';
 
@@ -29,6 +29,7 @@ export default function (bot) {
   bot.command('orders', saleOrders.listSaleOrders);
 
   bot.command('subscriptions', subscriptions.showSettings);
+  bot.hears('Настройки', subscriptions.showSettings);
   bot.action(/toggle_(.+)_(on|off)/, subscriptions.onToggleSetting);
 
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
@@ -86,9 +87,6 @@ async function onMessage(ctx) {
     return;
   }
 
-  const options = Markup.removeKeyboard()
-    .extra();
-
-  await ctx.reply('Я такое не понимаю пока', options);
+  await ctx.reply('Я такое не понимаю пока', settingsOptions());
 
 }
