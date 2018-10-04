@@ -139,7 +139,7 @@ export async function setupSqsConsumers() {
 
 export async function addSqsConsumer(groupChatId, queUrl) {
 
-  consumers[groupChatId] = new SqsConsumer(groupChatId, queUrl);
+  consumers[groupChatId] = new SqsConsumer({ groupChatId, queueUrl });
 
 }
 
