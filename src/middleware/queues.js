@@ -14,30 +14,37 @@ const { debug } = log('queues');
 export async function add(ctx) {
 
   const { match, chat: { id: chatId } } = ctx;
+  const [, url, inlineId] = match;
+  const id = inlineId ? parseInt(inlineId, 0) : chatId;
 
-  const [, url] = match;
+  debug('add', id, url);
 
-  debug('add', chatId, url);
+  await save(id, { url });
 
-  await save(chatId, { url });
+  addSqsConsumer(id, url);
 
-  addSqsConsumer(chatId, url);
-
-  await ctx.replyWithHTML('Добавил новую очередь');
+  await ctx.replyWithHTML(`Добавил новую очередь для чата <b>${id}</b>`);
 
 }
 
 export async function remove(ctx) {
 
-  const { chat: { id: chatId } } = ctx;
+  const { chat: { id: chatId }, match } = ctx;
+  const [, inlineId] = match;
+  const id = inlineId ? parseInt(inlineId, 0) : chatId;
 
-  debug('remove', chatId);
+  debug('remove', id);
 
-  await del(chatId);
+  const exists = await del(id);
 
-  removeSqsConsumer(chatId);
+  if (!exists) {
+    await ctx.replyWithHTML(`Не нашел очередь чата <b>${id}</b> и ничего не удалил`);
+    return;
+  }
 
-  await ctx.replyWithHTML('Удалил очередь');
+  removeSqsConsumer(id);
+
+  await ctx.replyWithHTML(`Удалил очередь чата <b>${id}</b>`);
 
 }
 
