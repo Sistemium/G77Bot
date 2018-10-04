@@ -37,10 +37,13 @@ class SqsConsumer {
 
     this.sqs.on('error', error);
     this.sqs.on('processing_error', error);
+    this.sqs.on('stopped', () => {
+      debug('stopped', this.groupChatId);
+    });
 
     this.sqs.start();
 
-    debug('started');
+    debug('started', this.groupChatId);
 
   }
 
@@ -137,13 +140,13 @@ export async function setupSqsConsumers() {
 
 }
 
-export async function addSqsConsumer(groupChatId, queUrl) {
+export function addSqsConsumer(groupChatId, queueUrl) {
 
   consumers[groupChatId] = new SqsConsumer({ groupChatId, queueUrl });
 
 }
 
-export async function removeSqsConsumer(groupChatId) {
+export function removeSqsConsumer(groupChatId) {
 
   const consumer = consumers[groupChatId];
 
