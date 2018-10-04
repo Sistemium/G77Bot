@@ -6,6 +6,7 @@ import { eachSeriesAsync } from 'sistemium-telegram/services/async';
 
 import map from 'lodash/map';
 import filter from 'lodash/filter';
+import forEach from 'lodash/forEach';
 import * as usersDb from './users';
 import { userSettings, subscriptionSettings } from './userSettings';
 import { isNotifyTime } from './moments';
@@ -129,7 +130,7 @@ export async function setupSqsConsumers() {
 
   const queues = await queuesDb.findAll();
 
-  queues.forEach(queue => {
+  forEach(queues, queue => {
 
     consumers[queue.id] = new SqsConsumer({
       groupChatId: queue.id,
