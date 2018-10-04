@@ -49,7 +49,7 @@ function settingsView(settings) {
   const buttons = map(allSettings, ({ label, defaultValue }, code) => {
 
     const val = (settings[code] === undefined ? defaultValue : settings[code]);
-    const txt = `${label}: ${val ? 'Да' : 'Нет'}`;
+    const txt = `${label}: ${val ? 'Присылать' : 'Не присылать'}`;
     const action = `toggle_${code}_${val ? 'off' : 'on'}`;
 
     return [Markup.callbackButton(txt, action)];
