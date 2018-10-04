@@ -23,7 +23,7 @@ export async function add(ctx) {
 
   addSqsConsumer(chatId, url);
 
-  await ctx.replyWithHTML('Added');
+  await ctx.replyWithHTML('Добавил новую очередь');
 
 }
 
@@ -37,7 +37,7 @@ export async function remove(ctx) {
 
   removeSqsConsumer(chatId);
 
-  await ctx.replyWithHTML('Removed');
+  await ctx.replyWithHTML('Удалил очередь');
 
 }
 
@@ -53,15 +53,15 @@ export async function list(ctx) {
 
   debug('list', queues.length);
 
-  const res = queues.map(JSON.stringify)
-    .join('\n');
+  if (!queues.length) {
 
-  if (!res) {
-
-    await ctx.replyWithHTML('Нет сохраненных адресов');
+    await ctx.replyWithHTML('Список очередей пуст, добавь командой /add_queue');
 
     return;
   }
+
+  const res = queues.map(JSON.stringify)
+    .join('\n');
 
   await ctx.replyWithHTML(res);
 
