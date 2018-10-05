@@ -23,6 +23,12 @@ const ALL_SETTINGS = {
 
 export async function userSettings(userId, setting) {
 
+  if (!ALL_SETTINGS[setting]) {
+
+    return true;
+
+  }
+
   const { settings = {} } = await getSession(BOT_ID, userId);
 
   const value = settings[setting];
