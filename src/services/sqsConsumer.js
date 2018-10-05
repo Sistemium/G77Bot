@@ -78,10 +78,8 @@ class SqsConsumer {
   }
 
   async messageHandler(msg, done) {
-
+    
     const { queueUrl } = this;
-
-    debug('got message');
 
     try {
 
@@ -98,6 +96,13 @@ class SqsConsumer {
         salesman,
       } = payload;
 
+      debug(`got message ${JSON.stringify({
+        messageType,
+        authId,
+        salesman,
+        org,
+      })}`);
+
       const allUsers = userId ? [userId] : await this.generateUserArray(
         org,
         messageType,
@@ -105,7 +110,6 @@ class SqsConsumer {
         salesman,
       );
 
-      debug(allUsers);
       const users = await filterUsers(allUsers, messageType);
 
       await postMessage(users, {
@@ -143,7 +147,10 @@ export async function setupSqsConsumers() {
 
 export function addSqsConsumer(groupChatId, queueUrl) {
 
-  consumers[groupChatId] = new SqsConsumer({ groupChatId, queueUrl });
+  consumers[groupChatId] = new SqsConsumer({
+    groupChatId,
+    queueUrl,
+  });
 
 }
 
