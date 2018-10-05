@@ -41,7 +41,7 @@ export default function (bot) {
    */
 
   bot.hears(/^\/auth[ ](\d+)$/, auth.auth);
-  bot.command('auth', Telegraf.branch(auth.isAuthorized, start, auth.auth));
+  bot.command('auth', Telegraf.branch(isAuthorized, start, auth.auth));
 
   bot.hears('Ввести другой номер', auth.onOtherPhone);
   bot.hears('Отменить', auth.onCancel);

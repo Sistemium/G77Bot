@@ -26,7 +26,10 @@ export async function login(phone) {
 
 export function confirm(code, id) {
 
-  const params = { ID: id, smsCode: code };
+  const params = {
+    ID: id,
+    smsCode: code,
+  };
   const config = {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     transformRequest: [data => {
@@ -39,4 +42,9 @@ export function confirm(code, id) {
   return http.post(PHA_AUTH_URL, params, config)
     .then(res => res.data || Promise.reject(new Error('Service error')));
 
+}
+
+export function isAuthorized(ctx) {
+
+  return !!ctx.session.account;
 }
