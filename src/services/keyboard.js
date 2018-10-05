@@ -1,16 +1,21 @@
-/* eslint-disable import/prefer-default-export */
 import Markup from 'telegraf/markup';
 
-export function settingsOptions() {
+import { isAuthorized } from './auth';
 
-  const buttons = [
-    ['Настройки'],
-  ];
+export function settingsOptions(ctx) {
+
+  const buttons = ['👤 Профиль'];
+
+  if (isAuthorized(ctx)) {
+
+    buttons.push('⚙ Настройки');
+
+  }
 
   return Markup
     .keyboard(buttons)
     .resize()
-    .extra();
+    .extra({ parse_mode: 'HTML' });
 
 }
 

@@ -59,7 +59,7 @@ export async function authWithPhone(ctx, phoneNumberNotValidated) {
     `на номер ${phoneNumber}`,
   ].join(' ');
 
-  await ctx.reply(reply, settingsOptions());
+  await ctx.reply(reply, settingsOptions(ctx));
 
 }
 
@@ -105,7 +105,7 @@ export async function confirm(ctx) {
       authId,
     });
 
-    await ctx.replyHTML(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`);
+    await ctx.reply(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`, settingsOptions(ctx));
 
   } catch (e) {
     await ctx.reply('❌ Неправильный код!');
@@ -131,10 +131,10 @@ export async function logout(ctx) {
 
     await removeUser(org, userId);
 
-    await ctx.reply('Ок', settingsOptions());
+    await ctx.reply('Ок', settingsOptions(ctx));
 
   } catch (e) {
-    await ctx.reply('Что-то пошло не так', settingsOptions());
+    await ctx.reply('Что-то пошло не так', settingsOptions(ctx));
     error(e);
   }
 
@@ -154,12 +154,6 @@ export async function getRoles(ctx) {
 
 }
 
-
-export function isAuthorized(ctx) {
-  return !!ctx.session.account;
-}
-
-
 export async function explainAuth(ctx) {
 
   const { session } = ctx;
@@ -169,11 +163,11 @@ export async function explainAuth(ctx) {
 
   const buttons = [
     [{
-      text: 'Использовать текущий номер',
+      text: '📱 Использовать текущий номер',
       request_contact: true,
     }],
-    ['Ввести другой номер'],
-    ['Отменить'],
+    ['🔢 Ввести другой номер'],
+    ['❌ Отменить'],
   ];
 
   const options = Markup
@@ -194,14 +188,14 @@ export async function onCancel(ctx) {
   delete session.waitingForCode;
   delete session.tempPhoneNumber;
 
-  await ctx.reply('Хорошо, потом авторизуешься', settingsOptions());
+  await ctx.reply('Хорошо, потом авторизуешься', settingsOptions(ctx));
 
 }
 
 export async function onOtherPhone(ctx) {
   const { session } = ctx;
   session.waitingForPhone = true;
-  await ctx.reply('Напиши номер телефона через 8ку или +7', settingsOptions());
+  await ctx.reply('Напиши номер телефона через 8ку или +7', settingsOptions(ctx));
 }
 
 function replyNotAuthorized(ctx) {

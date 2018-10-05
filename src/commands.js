@@ -9,6 +9,7 @@ import * as queues from './middleware/queues';
 
 import { settingsOptions } from './services/keyboard';
 import * as auth from './middleware/auth';
+import { isAuthorized } from './services/auth';
 import * as subscriptions from './middleware/subscriptions';
 
 const { debug } = log('commands');
@@ -22,6 +23,7 @@ export default function (bot) {
   bot.hears(/^\/add[ _]queue ([^ ]+)[ ]?(.*)/, queues.add);
   bot.hears(/^\/list[ _]queues$/, queues.list);
   bot.hears(/^\/remove[ _]queue[ ]?(.*)$/, queues.remove);
+  bot.hears('👤 Профиль', start);
 
   bot.command('start', start);
   bot.command('logout', auth.logout);
@@ -29,7 +31,7 @@ export default function (bot) {
   bot.command('orders', saleOrders.listSaleOrders);
 
   bot.command('subscriptions', subscriptions.showSettings);
-  bot.hears('Настройки', subscriptions.showSettings);
+  bot.hears('⚙ Настройки', subscriptions.showSettings);
   bot.action(/toggle_(.+)_(on|off)/, subscriptions.onToggleSetting);
 
   bot.hears(/^\/so_(\d+)$/, saleOrders.showSaleOrder);
@@ -43,8 +45,8 @@ export default function (bot) {
   bot.hears(/^\/auth[ ](\d+)$/, auth.auth);
   bot.command('auth', Telegraf.branch(isAuthorized, start, auth.auth));
 
-  bot.hears('Ввести другой номер', auth.onOtherPhone);
-  bot.hears('Отменить', auth.onCancel);
+  bot.hears('🔢 Ввести другой номер', auth.onOtherPhone);
+  bot.hears('❌ Отменить', auth.onCancel);
 
   bot.on('contact', onContact);
   bot.on('message', Telegraf.optional(authIsWaitingForPhone, onContact));
@@ -87,6 +89,6 @@ async function onMessage(ctx) {
     return;
   }
 
-  await ctx.reply('Я такое не понимаю пока', settingsOptions());
+  await ctx.reply('Я такое не понимаю пока', settingsOptions(ctx));
 
 }
