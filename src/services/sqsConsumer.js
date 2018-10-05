@@ -78,7 +78,7 @@ class SqsConsumer {
   }
 
   async messageHandler(msg, done) {
-    
+
     const { queueUrl } = this;
 
     try {
