@@ -6,6 +6,7 @@ import log from 'sistemium-telegram/services/log';
 import Markup from 'telegraf/markup';
 
 import { findAll, find } from '../services/api';
+import { nameForConfig } from '../services/dictionary';
 
 const { debug } = log('saleOrders');
 
@@ -73,10 +74,12 @@ export async function showSaleOrder(ctx) {
 
   saleOrder.outlet = await find('Outlet', org, authorization, { id: saleOrder.outletId });
 
+  const workflow = await find('Workflow', org, authorization, { code: 'saleOrder.v2' });
+
   const res = [
     `Заказ для «${saleOrder.outlet.name}»`,
     `на сумму: ${saleOrder.totalCost}₽`,
-    `статус заказа: <b>${saleOrder.processing}</b>`,
+    `статус заказа: <b>${nameForConfig(workflow.workflow, saleOrder.processing)}</b>`,
   ];
 
   const kb = Markup.inlineKeyboard([

@@ -1,4 +1,4 @@
-export const config = {
+const config = {
   r50: {
     label: 'Регион-50',
   },
@@ -19,4 +19,9 @@ export const config = {
 export function orgName(code) {
   const org = config[code];
   return org && org.label || code;
+}
+
+export function nameForConfig(cunstomConfig, code) {
+  const name = cunstomConfig[code];
+  return name && name.label || code;
 }

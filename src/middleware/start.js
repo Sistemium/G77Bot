@@ -4,7 +4,7 @@ import { explainAuth } from './auth';
 
 import { isAuthorized } from '../services/auth';
 
-import { orgName } from '../services/org';
+import { orgName } from '../services/dictionary';
 
 const { debug } = log('start');
 

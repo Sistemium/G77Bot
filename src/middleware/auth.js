@@ -3,7 +3,7 @@ import Markup from 'telegraf/markup';
 import * as pha from '../services/auth';
 import validatePhoneNumber from '../services/functions';
 import { addUser, removeUser } from '../services/users';
-import { orgName } from '../services/org';
+import { orgName } from '../services/dictionary';
 import { settingsOptions } from '../services/keyboard';
 
 const { debug, error } = log('auth');
