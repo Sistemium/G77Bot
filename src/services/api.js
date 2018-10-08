@@ -6,9 +6,9 @@ if (!STAPI_TOKEN) {
   throw new Error('STAPI_TOKEN is not set');
 }
 
-export function findAll(name, authorization, params) {
+export function findAll(name, org, authorization, params) {
 
-  return axios.get(apiUrl(name), {
+  return axios.get(apiUrl(org, name), {
     params,
     headers: { authorization },
   })
@@ -16,9 +16,9 @@ export function findAll(name, authorization, params) {
 
 }
 
-export function find(name, authorization, params) {
+export function find(name, org, authorization, params) {
 
-  return axios.get(apiUrl(name), {
+  return axios.get(apiUrl(org, name), {
     params,
     headers: { authorization },
   })
@@ -27,13 +27,13 @@ export function find(name, authorization, params) {
 }
 
 
-function apiUrl(name) {
-  return `${API_URL}/${name}`;
+function apiUrl(org, name) {
+  return `${API_URL}/${org}/${name}`;
 }
 
-export function create(name, authorization, attrs) {
+export function create(name, org, authorization, attrs) {
 
-  return axios.post(apiUrl(name), attrs, {
+  return axios.post(apiUrl(org, name), attrs, {
     headers: { authorization: authorization || STAPI_TOKEN },
   })
     .then(({ data }) => data);

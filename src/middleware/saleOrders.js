@@ -11,11 +11,11 @@ const { debug } = log('saleOrders');
 
 export async function listSaleOrders(ctx) {
 
-  const { session: { accessToken: authorization } } = ctx;
+  const { session: { accessToken: authorization, roles: { org } } } = ctx;
 
   await ctx.replyWithChatAction('typing');
 
-  const saleOrders = await findAll('SaleOrder', authorization, { processing: 'draft' });
+  const saleOrders = await findAll('SaleOrder', org, authorization, { processing: 'draft' });
 
   const outletIds = unique(map(saleOrders, 'outletId'));
 
@@ -23,7 +23,7 @@ export async function listSaleOrders(ctx) {
 
   const where = JSON.stringify({ id: { '==': outletIds } });
 
-  const outlets = await findAll('Outlet', authorization, { 'where:': where });
+  const outlets = await findAll('Outlet', org, authorization, { 'where:': where });
 
   const outletsById = keyBy(outlets, 'id');
 
@@ -58,11 +58,11 @@ function formatSaleOrder(saleOrder) {
 
 export async function showSaleOrder(ctx) {
 
-  const { session: { accessToken: authorization }, match } = ctx;
+  const { session: { accessToken: authorization, roles: { org } }, match } = ctx;
 
   const [, num] = match;
 
-  const saleOrder = await find('SaleOrder', authorization, { num });
+  const saleOrder = await find('SaleOrder', org, authorization, { num });
 
   debug('showSaleOrder', num, saleOrder);
 
@@ -71,7 +71,7 @@ export async function showSaleOrder(ctx) {
     return;
   }
 
-  saleOrder.outlet = await find('Outlet', authorization, { id: saleOrder.outletId });
+  saleOrder.outlet = await find('Outlet', org, authorization, { id: saleOrder.outletId });
 
   const res = [
     `Заказ для «${saleOrder.outlet.name}»`,
@@ -79,18 +79,13 @@ export async function showSaleOrder(ctx) {
     `статус заказа: <b>${saleOrder.processing}</b>`,
   ];
 
-  await ctx.replyWithHTML(res.join('\n'));
-
   const kb = Markup.inlineKeyboard([
     Markup.callbackButton('Передать в работу', actionData('upload')),
     Markup.callbackButton('Удалить', actionData('delete')),
-    Markup.callbackButton('Показать товары', actionData('showArticles')),
   ])
     .extra();
 
-  const kbReply = await ctx.reply('Выберите действие:', kb);
-
-  debug(JSON.stringify(kbReply));
+  await ctx.replyWithHTML(res.join('\n'), kb);
 
   function actionData(data) {
     return `salOrder_${num}_${data}`;
