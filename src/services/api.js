@@ -27,8 +27,8 @@ export function find(name, org, authorization, params) {
 }
 
 
-function apiUrl(org, name) {
-  return `${API_URL}/${org}/${name}`;
+function apiUrl(org, name, id = '') {
+  return `${API_URL}/${org}/${name}/${id}`;
 }
 
 export function create(name, org, authorization, attrs) {
@@ -37,5 +37,13 @@ export function create(name, org, authorization, attrs) {
     headers: { authorization: authorization || STAPI_TOKEN },
   })
     .then(({ data }) => data);
+
+}
+
+export function remove(name, org, authorization, id) {
+
+  return axios.delete(apiUrl(org, name, id), {
+    headers: { authorization: authorization || STAPI_TOKEN },
+  });
 
 }
