@@ -31,9 +31,9 @@ function apiUrl(org, name, id = '') {
   return `${API_URL}/${org}/${name}/${id}`;
 }
 
-export function create(name, org, authorization, attrs) {
+export function update(name, org, authorization, attrs) {
 
-  return axios.post(apiUrl(org, name), attrs, {
+  return axios.patch(apiUrl(org, name), attrs, {
     headers: { authorization: authorization || STAPI_TOKEN },
   })
     .then(({ data }) => data);
