@@ -5,7 +5,13 @@ import log from 'sistemium-telegram/services/log';
 
 import Markup from 'telegraf/markup';
 
-import { findAll, find } from '../services/api';
+import { settingsOptions } from '../services/keyboard';
+import {
+  findAll,
+  find,
+  update,
+  remove,
+} from '../services/api';
 import { nameForConfig } from '../services/dictionary';
 
 const { debug } = log('saleOrders');
@@ -17,6 +23,14 @@ export async function listSaleOrders(ctx) {
   await ctx.replyWithChatAction('typing');
 
   const saleOrders = await findAll('SaleOrder', org, authorization, { processing: 'draft' });
+
+  if (!saleOrders.length) {
+
+    ctx.reply('Нет черновиков', settingsOptions(ctx));
+
+    return;
+
+  }
 
   const outletIds = unique(map(saleOrders, 'outletId'));
 
@@ -65,8 +79,6 @@ export async function showSaleOrder(ctx) {
 
   const saleOrder = await find('SaleOrder', org, authorization, { num });
 
-  debug('showSaleOrder', num, saleOrder);
-
   if (!saleOrder) {
     await ctx.reply(`Нет заказа с номером ${num}`);
     return;
@@ -104,11 +116,51 @@ export async function showSaleOrder(ctx) {
 
 export async function saleOrderActions(ctx) {
 
-  const { match } = ctx;
-
-  debug(JSON.stringify(Object.keys(ctx.tg)));
+  const { session: { accessToken: authorization, roles: { org } }, match } = ctx;
 
   const [, num, actionName] = match;
-  await ctx.answerCbQuery(`SaleOrder ${num} ${actionName}`);
+
+  const saleOrder = await find('SaleOrder', org, authorization, { num });
+
+  switch (actionName) {
+    case 'upload': {
+
+      const result = await update('SaleOrder', org, authorization, {
+        id: saleOrder.id,
+        processing: 'upload',
+      });
+
+      if (result.processing === 'draft') {
+
+        await ctx.reply('❌ Ошибка передачи', settingsOptions(ctx));
+
+        return;
+
+      }
+
+      await ctx.reply('✅ Заказ успешно передан в работу', settingsOptions(ctx));
+
+      break;
+
+    }
+    case 'delete': {
+
+      const result = await remove('SaleOrder', org, authorization, saleOrder.id);
+
+      if (result.status === 200) {
+
+        await ctx.reply('✅ Заказ успешно удален', settingsOptions(ctx));
+
+        return;
+
+      }
+
+      await ctx.reply('❌ Ошибка удаления', settingsOptions(ctx));
+
+      break;
+
+    }
+    default:
+  }
 
 }
