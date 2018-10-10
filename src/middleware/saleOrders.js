@@ -88,11 +88,20 @@ export async function showSaleOrder(ctx) {
 
   const workflow = await find('Workflow', org, authorization, { code: 'saleOrder.v2' });
 
+  const saleOrderPositions = await findAll('saleOrderPosition', org, authorization, { saleOrderId: saleOrder.id });
+
+  debug(saleOrder);
+
   const res = [
-    `Заказ для «${saleOrder.outlet.name}»`,
-    `на сумму: ${saleOrder.totalCost}₽`,
-    `статус заказа: <b>${nameForConfig(workflow.workflow, saleOrder.processing)}</b>`,
+    `${nameForConfig(workflow.workflow, saleOrder.processing)} для «<b>${saleOrder.outlet.name}</b>»`,
+    `<b>${saleOrderPositions.length}</b> п. <b>${saleOrder.totalCost || 0}</b>₽`,
   ];
+
+  if (saleOrder.processingMessage) {
+
+    res.push(saleOrder.processingMessage);
+
+  }
 
   const kb = Markup.inlineKeyboard([
     Markup.callbackButton('Передать в работу', actionData('upload')),
