@@ -6,6 +6,8 @@ import { orgName } from '../services/org';
 
 const { debug } = log('start');
 
+const { BOT_USER_NAME } = process.env;
+
 export default async function (ctx) {
 
   const {
@@ -15,6 +17,7 @@ export default async function (ctx) {
         first_name: firstName,
         last_name: lastName,
       },
+      chat: { id: chatId },
     },
     session,
   } = ctx;
@@ -26,6 +29,11 @@ export default async function (ctx) {
     `Твой ид Телеграм: <b>${userId}</b>`,
     '',
   ];
+
+  if (userId !== chatId) {
+    await ctx.replyWithHTML(`Чтобы начать работу перейди ко мне в диалог: @${BOT_USER_NAME}`);
+    return;
+  }
 
   if (!isAuthorized(ctx)) {
     await explainAuth(ctx);
