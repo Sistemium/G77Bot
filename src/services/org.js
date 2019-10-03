@@ -12,7 +12,7 @@ export const config = {
     label: 'Город 77 тест',
   },
   r50p: {
-    label: 'ИБИС',
+    label: 'ЭКОВАЙН',
   },
 };
 

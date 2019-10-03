@@ -31,7 +31,7 @@ export default async function (ctx) {
   ];
 
   if (userId !== chatId) {
-    await ctx.replyWithHTML(`Чтобы начать работу перейди ко мне в диалог: @${BOT_USER_NAME}`);
+    await ctx.replyWithHTML(`Чтобы меня использовать зайди ко мне в чат @${BOT_USER_NAME}`);
     return;
   }
 

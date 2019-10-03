@@ -199,7 +199,7 @@ export async function onCancel(ctx) {
   delete session.waitingForCode;
   delete session.tempPhoneNumber;
 
-  await ctx.reply('Хорошо, потом авторизуешься', REMOVE_KEYBOARD);
+  await ctx.reply('Хорошо, потом авторизуешься - нажми /auth когда решишься', REMOVE_KEYBOARD);
 
 }
 
