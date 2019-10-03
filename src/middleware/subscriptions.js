@@ -1,24 +1,37 @@
 import log from 'sistemium-telegram/services/log';
+import { BOT_USER_NAME } from 'sistemium-telegram/services/bot';
 import Markup from 'telegraf/markup';
 import map from 'lodash/map';
 import { subscriptionSettings } from '../services/userSettings';
 
-const { debug } = log('subscriptions');
-
-const allSettings = subscriptionSettings();
+const { debug, error } = log('subscriptions');
 
 export async function showSettings(ctx) {
 
-  const { session } = ctx;
-  const { settings = {}, lastSubscriptionSettingsMessageId } = session;
+  const { session, chat, from } = ctx;
+  const { settings = {}, lastSubscriptionSettingsMessageId, account } = session;
 
-  if (lastSubscriptionSettingsMessageId) {
-    ctx.deleteMessage(lastSubscriptionSettingsMessageId);
+  if (chat.id !== from.id) {
+    const replyGoPrivate = [
+      `Чтобы посмотреть настройки уведомлений зайди ко мне в чат @${BOT_USER_NAME}`,
+    ];
+    await ctx.replyWithHTML(replyGoPrivate.join('\n'));
+    return;
   }
 
-  const { reply, keyboard } = settingsView(settings);
+  if (!account) {
+    await ctx.replyWithHTML('Сперва тебе нужно авторизоваться, нажми /auth');
+    return;
+  }
 
-  const { message_id: messageId } = await ctx.reply(reply, keyboard);
+  if (lastSubscriptionSettingsMessageId) {
+    ctx.deleteMessage(lastSubscriptionSettingsMessageId)
+      .catch(error);
+  }
+
+  const { text, keyboard } = settingsView(settings, account.org);
+
+  const { message_id: messageId } = await ctx.reply(text, keyboard);
 
   session.lastSubscriptionSettingsMessageId = messageId;
 
@@ -36,15 +49,18 @@ export async function onToggleSetting(ctx) {
 
   ctx.session.settings = settings;
 
-  ctx.answerCbQuery('Готово!');
+  ctx.answerCbQuery('Готово!')
+    .catch(error);
 
-  const { reply, keyboard } = settingsView(settings);
+  const { text, keyboard } = settingsView(settings);
 
-  await ctx.editMessageText(reply, keyboard);
+  await ctx.editMessageText(text, keyboard);
 
 }
 
-function settingsView(settings) {
+function settingsView(settings, org) {
+
+  const allSettings = subscriptionSettings(org);
 
   const buttons = map(allSettings, ({ label, defaultValue }, code) => {
 
@@ -57,12 +73,12 @@ function settingsView(settings) {
   });
 
   const keyboard = Markup.inlineKeyboard(buttons).extra();
-  const reply = 'Твои настройки уведомлений:';
+  const text = 'Твои настройки уведомлений:';
 
   // debug(JSON.stringify(keyboard));
 
   return {
-    reply,
+    text,
     keyboard,
   };
 

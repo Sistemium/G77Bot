@@ -54,7 +54,7 @@ class SqsConsumer {
 
   async generateUserArray(org, messageType, authId, salesman) {
 
-    if (!subscriptionSettings()[messageType]) {
+    if (!subscriptionSettings(org)[messageType]) {
       return [this.groupChatId];
     }
 
@@ -190,7 +190,8 @@ async function postMessage(ids, options) {
         parseMessageBody(body),
       ].join('\n');
 
-      telegram.sendMessage(id, msg, opts);
+      await telegram.sendMessage(id, msg, opts)
+        .catch(error);
 
     }
 

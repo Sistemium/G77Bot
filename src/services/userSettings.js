@@ -1,5 +1,8 @@
 import { BOT_ID } from 'sistemium-telegram/services/bot';
 import { getSession } from 'sistemium-telegram/services/session';
+import lo from 'lodash';
+
+const LIKE_R50 = /r50p?/;
 
 const ALL_SETTINGS = {
   SaleOrderStatus: {
@@ -9,10 +12,12 @@ const ALL_SETTINGS = {
   OutletStatus: {
     label: 'Статусы торговых точек',
     defaultValue: true,
+    orgRe: LIKE_R50,
   },
   ContractStatus: {
     label: 'Статусы договоров',
     defaultValue: true,
+    orgRe: LIKE_R50,
   },
   StockGone: {
     label: 'Больше нет на складе',
@@ -27,11 +32,11 @@ export async function userSettings(userId, setting) {
 
   const value = settings[setting];
 
-  return (value === undefined ? ALL_SETTINGS[setting].defaultValue : value);
+  return value === undefined ? ALL_SETTINGS[setting].defaultValue : value;
 
 }
 
 
-export function subscriptionSettings() {
-  return { ...ALL_SETTINGS };
+export function subscriptionSettings(org) {
+  return lo.pickBy(ALL_SETTINGS, ({ orgRe }) => !orgRe || orgRe.test(org));
 }
