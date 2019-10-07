@@ -3,6 +3,7 @@ import { getSession } from 'sistemium-telegram/services/session';
 import lo from 'lodash';
 
 const LIKE_R50 = /r50p?/;
+const LIKE_BS = /bs|dev/;
 
 const ALL_SETTINGS = {
   SaleOrderStatus: {
@@ -22,6 +23,11 @@ const ALL_SETTINGS = {
   StockGone: {
     label: 'Больше нет на складе',
     defaultValue: false,
+  },
+  DebtPaid: {
+    label: 'Оплата долгов',
+    defaultValue: false,
+    orgRe: LIKE_BS,
   },
 };
 
