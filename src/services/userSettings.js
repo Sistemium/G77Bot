@@ -38,7 +38,7 @@ export async function userSettings(userId, setting) {
 
   const value = settings[setting];
 
-  return value === undefined ? ALL_SETTINGS[setting].defaultValue : value;
+  return value === undefined ? lo.get(ALL_SETTINGS[setting], 'defaultValue') : value;
 
 }
 
