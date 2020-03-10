@@ -107,7 +107,11 @@ export async function confirm(ctx) {
       authId,
     });
 
-    await ctx.replyHTML(`✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`);
+    await ctx.replyHTML([
+      `✅ <b>${name}</b>, добро пожаловать в Телеграм-бота «${orgName(org)}»!`,
+      '',
+      'Нажми /subscriptions чтобы посмотреть настройки уведомлений, которые я могу присылать.',
+    ].join('\n'));
 
   } catch (e) {
     await ctx.reply('❌ Неправильный код!');

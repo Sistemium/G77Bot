@@ -60,6 +60,8 @@ export default async function (ctx) {
       .join(', ')}`);
   }
 
+  res.push('', 'Нажми /subscriptions чтобы посмотреть настройки уведомлений, которые я могу присылать.');
+
   await ctx.replyWithHTML(res.join('\n'));
 
 }
