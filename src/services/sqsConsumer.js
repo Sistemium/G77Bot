@@ -58,12 +58,20 @@ class SqsConsumer {
       return [this.groupChatId];
     }
 
-    const result = filter(
-      await usersDb.findAll(org),
-      user => (authId && user.authId === authId)
-        || (salesman && user.salesman === salesman)
-        || (!salesman && !authId),
-    );
+    const allOrgUsers = await usersDb.findAll(org);
+
+    const result = filter(allOrgUsers, user => {
+      if (authId && user.authId === authId) {
+        return true;
+      }
+      if (salesman && user.salesman === salesman) {
+        return true;
+      }
+      if (Array.isArray(user.salesman)) {
+        return user.salesman.indexOf(salesman) >= 0;
+      }
+      return !salesman && !authId;
+    });
 
     if (authId && !result.length) {
       debug(`no user with authID: ${authId}`);
