@@ -13,9 +13,11 @@ export async function showSettings(ctx) {
 
   if (chat.id !== from.id) {
     const replyGoPrivate = [
-      `Чтобы посмотреть настройки уведомлений зайди ко мне в чат @${BOT_USER_NAME}`,
+      `${from.first_name}, ты нажал команду показа настроек уведомлений,`,
+      'но она не работает в групповых чатах.',
+      `Если хочешь посмотреть свои настройки уведомлений – зайди ко мне в диалог: @${BOT_USER_NAME}`,
     ];
-    await ctx.replyWithHTML(replyGoPrivate.join('\n'));
+    await ctx.replyWithHTML(replyGoPrivate.join(' '));
     return;
   }
 
