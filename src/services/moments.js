@@ -1,5 +1,5 @@
 import { format, addDays, getHours } from 'date-fns';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 
 const { debug } = log('moments');
 

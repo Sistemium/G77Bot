@@ -1,7 +1,7 @@
 import map from 'lodash/map';
 import keyBy from 'lodash/keyBy';
 import unique from 'lodash/uniq';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 
 import Markup from 'telegraf/markup';
 

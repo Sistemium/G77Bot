@@ -12,24 +12,24 @@
     "build": "npm run lint && rm -rf dist && babel src -d dist && npm run pkg"
   },
   "dependencies": {
-    "async": "^2.6.1",
-    "aws-sdk": "^2.7.6",
-    "axios": "^0.18.0",
+    "async": "^2.6.4",
+    "aws-sdk": "^2.1200.0",
+    "axios": "^0.27.2",
     "date-fns": "v2.0.0-alpha.8",
-    "debug": "^3.1.0",
-    "lodash": "^4.17.10",
-    "sistemium-telegram": "1.2.5",
-    "sqs-consumer": "^3.4.0",
-    "telegraf": "^3.22.2"
+    "sistemium-debug": "^1.0.1",
+    "lodash": "^4.17.21",
+    "sistemium-telegram": "1.2.14",
+    "sqs-consumer": "^3.8.0",
+    "telegraf": "^3.40.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
     "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^13.0.0",
-    "eslint-plugin-import": "^2.13.0",
-    "nodemon": "^1.18.3"
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.26.0",
+    "nodemon": "^1.19.4"
   },
   "repository": {
     "type": "git",

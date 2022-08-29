@@ -1,6 +1,6 @@
 import Markup from 'telegraf/markup';
 import Telegraf from 'telegraf';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 import start from './middleware/start';
 import calc from './middleware/calc';
 import * as members from './middleware/members';

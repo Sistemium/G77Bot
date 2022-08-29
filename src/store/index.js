@@ -1,5 +1,5 @@
 import * as redis from 'sistemium-telegram/services/redis';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 
 // export * from './queues';
 

@@ -1,5 +1,5 @@
 import Consumer from 'sqs-consumer';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 import bot from 'sistemium-telegram/services/bot';
 import { SQS } from 'aws-sdk';
 import { eachSeriesAsync } from 'sistemium-telegram/services/async';

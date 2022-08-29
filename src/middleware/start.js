@@ -1,4 +1,4 @@
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 
 import { isAuthorized, explainAuth } from './auth';
 

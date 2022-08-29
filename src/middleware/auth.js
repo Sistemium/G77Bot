@@ -1,4 +1,4 @@
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 import Markup from 'telegraf/markup';
 import * as pha from '../services/auth';
 import validatePhoneNumber from '../services/functions';

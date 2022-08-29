@@ -1,4 +1,4 @@
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 import { BOT_USER_NAME } from 'sistemium-telegram/services/bot';
 import Markup from 'telegraf/markup';
 import map from 'lodash/map';

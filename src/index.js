@@ -1,5 +1,5 @@
 import bot, { BOT_ID } from 'sistemium-telegram/services/bot';
-import log from 'sistemium-telegram/services/log';
+import log from 'sistemium-debug';
 import { client as redis } from 'sistemium-telegram/services/redis';
 import session from 'sistemium-telegram/services/session';
 import contextConfig from 'sistemium-telegram/config/context';
