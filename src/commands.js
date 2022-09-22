@@ -66,11 +66,21 @@ export default function (bot) {
 }
 
 function authIsWaitingForCode(ctx) {
-  return ctx.session.waitingForCode;
+  const {
+    session,
+    chat: { id: chatId },
+    from: { id: fromId },
+  } = ctx;
+  return chatId === fromId && session.waitingForCode;
 }
 
 function authIsWaitingForPhone(ctx) {
-  return ctx.session.waitingForPhone;
+  const {
+    session,
+    chat: { id: chatId },
+    from: { id: fromId },
+  } = ctx;
+  return chatId === fromId && session.waitingForPhone;
 }
 
 async function onMessage(ctx) {
