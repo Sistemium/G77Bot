@@ -1,4 +1,7 @@
 {
+  "execMap": {
+    "js": "node -r esm"
+  },
   "env": {
     "DEBUG": "stm:*",
     "PHRASE_NOT_IMPLEMENTED": "I don't understand this kind of messages",
